@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String  @id @default(uuid())
+  name         String
+  email        String
+  passwordHash String?
+
+  //  Verification 
+  isVerified                    Boolean       @default(false)
+  emailVerificationToken        String?
+  emailVerificationTokenExpires DateTime?
+  // reset password
+  resetPasswordToken            String?
+  resetPasswordTokenExpires     DateTime?
+  // TimeStamps
+  createdAt                     DateTime      @default(now())
+  updatedAt                     DateTime      @updatedAt
+  // Relations
+  events                        Event[]
+  userSessions                  UserSession[]
+}
+
+enum EventStatus {
+  CREATED
+  PROCESSING
+  COMPLETED
+  PARTIAL_FAILURE
+  FAILED
+}
+
+model Event {
+  id               String          @id @default(uuid())
+  name             String
+  totalPhotos      Int             @default(0)
+  uploadedPhotos   Int             @default(0)
+  processingPhotos Int             @default(0)
+  completedPhotos  Int             @default(0)
+  failedPhotos     Int             @default(0)
+  status           EventStatus     @default(CREATED)
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  searchRequests   SearchRequest[]
+  photos           Photo[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+enum PhotoStatus {
+  PENDING_UPLOAD
+  UPLOADING
+  UPLOADED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Photo {
+  id                String            @id @default(uuid())
+  event             Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId           String
+  localPath         String?
+  status            PhotoStatus       @default(PENDING_UPLOAD)
+  publicUrl         String?
+  guestPhotoMatches GuestPhotoMatch[]
+
+  @@index([eventId])
+}
+
+enum SearchRequestStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model SearchRequest {
+  id                 String              @id @default(uuid())
+  eventId            String
+  event              Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  chatId             String // Telegram chatId to send message back once searching is completed is ready : ) 
+  selfieUrl          String
+  status             SearchRequestStatus @default(PENDING)
+  matchedPhotosCount Int                 @default(0)
+  matches            GuestPhotoMatch[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([eventId, chatId])
+}
+
+// User uploads selfie
+// ↓
+// PENDING
+
+// Worker starts
+// ↓
+// PROCESSING
+
+// Matches found
+// ↓ 
+// COMPLETED
+
+// Embedding failure
+// ↓
+// FAILED
+
+model GuestPhotoMatch {
+  searchRequestId String
+  photoId         String
+
+  searchRequest SearchRequest @relation(fields: [searchRequestId], references: [id], onDelete: Cascade)
+  photo         Photo         @relation(fields: [photoId], references: [id])
+
+  confidence Float? // Similirity Score (0-1)
+
+  @@id([searchRequestId, photoId])
+}
+
+model UserSession {
+  id                  String   @id @default(uuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken        String   @unique
+  refreshTokenExpires DateTime
+  deviceInfo          Json?
+  ipAddress           String?
+  // timeStamps
+  createdAt           DateTime @default(now())
+  lastUsedAt          DateTime @updatedAt // Updates every time when user gets a new accessToken 
+}

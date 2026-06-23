@@ -1,0 +1,61 @@
+name: photo_dey_services
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: photodey_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: photodey
+      POSTGRES_PASSWORD: photodey123
+      POSTGRES_DB: photodey_dev
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U photodey -d photodey_dev']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: photodey_redis
+    restart: unless-stopped
+    command: redis-server --requirepass photodeyredis123
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--pass', 'photodeyredis123', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: photodey_qdrant
+    restart: unless-stopped
+    environment:
+      QDRANT__SERVICE__API_KEY: photodey_qdrant_key
+    ports:
+      - '6333:6333'
+      - '6334:6334'
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'wget --quiet --tries=1 --spider http://localhost:6333/healthz || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+  qdrant_data:
