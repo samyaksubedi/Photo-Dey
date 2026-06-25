@@ -3,13 +3,18 @@ configDotenv();
 
 import { app } from './app.js';
 import { envVariables } from './configs/env.config.js';
+import { logger } from './configs/logger.config.js';
+import { testPostgresConnection } from './db/db.client.js';
 
 const PORT = envVariables.PORT;
-
+async function testDependency() {
+  await testPostgresConnection();
+}
 async function server() {
+  await testDependency();
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`API endpoints available at ${envVariables.SERVER_URL}/api`);
+    logger.info(`Server running on port ${PORT}`);
+    logger.info(`API endpoints available at ${envVariables.SERVER_URL}/api`);
   });
 }
 
