@@ -1,13 +1,14 @@
 import winston from 'winston';
+import { configDotenv } from 'dotenv';
+configDotenv();
 
 const { combine, timestamp, json, colorize, simple } = winston.format;
-
+console.log(process.env.NODE_ENV);
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
 
   format: combine(timestamp({ format: 'DD-MM-YYYY, hh:mm:ss A' }), json()),
 });
-
 if (process.env.NODE_ENV == 'production') {
   logger.add(
     new winston.transports.File({
