@@ -5,9 +5,11 @@ import { app } from './app.js';
 import { envVariables } from './configs/env.config.js';
 import { logger } from './configs/logger.config.js';
 import { testPostgresConnection } from './db/db.client.js';
+import { testMailTransporter } from './configs/mail.config.js';
 
 const PORT = envVariables.PORT;
 async function testDependency() {
+  testMailTransporter();
   await testPostgresConnection();
 }
 async function server() {

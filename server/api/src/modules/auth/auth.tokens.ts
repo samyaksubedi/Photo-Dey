@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { envVariables } from '../../configs/env.config.js';
 
-const generateEmailVerificationToken = () => {
+export const generateEmailVerificationToken = () => {
   const emailVerificationToken = crypto.randomBytes(32).toString('hex');
   const emailVerificationTokenExpires = new Date(
     Date.now() + 24 * 60 * 60 * 1000,
@@ -10,7 +10,7 @@ const generateEmailVerificationToken = () => {
   return { emailVerificationToken, emailVerificationTokenExpires };
 };
 
-const generateAccessToken = (
+export const generateAccessToken = (
   userId: string,
   email: string,
   sessiionId: string,
@@ -18,4 +18,10 @@ const generateAccessToken = (
   jwt.sign({ userId, email, sessiionId }, envVariables.ACCESS_TOKEN_SECRET, {
     expiresIn: '15m',
   });
+};
+
+export const generateRefreshToken = () => {
+  const refreshToken = crypto.randomBytes(64).toString('hex');
+  const refreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); //30 days
+  return { refreshToken, refreshTokenExpires };
 };
