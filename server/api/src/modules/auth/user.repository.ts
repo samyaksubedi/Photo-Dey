@@ -1,14 +1,12 @@
 // Handles communication with database using ORM
-import type { CreateUserInput, UserExistsInput } from './auth.types.js';
+import type {
+  CreateUserInput,
+  UpdateEmailVerificationTokenAndExpiryInput,
+} from './auth.types.js';
+import type { Prisma } from '../../generated/prisma/client.js';
+
 import { prisma } from '../../db/db.client.js';
-const userExists = async (data: UserExistsInput): Promise<boolean> => {
-  const result = await prisma.user.findUnique({
-    where: {
-      email: data.email,
-    },
-  });
-  return result ? true : false;
-};
+
 const createUser = async (data: CreateUserInput) => {
   return await prisma.user.create({
     data: {
@@ -22,5 +20,85 @@ const createUser = async (data: CreateUserInput) => {
     },
   });
 };
+const updateEmailVerificationTokenAndExpiry = async (
+  data: UpdateEmailVerificationTokenAndExpiryInput,
+): Promise<void> => {
+  await prisma.user.update({
+    where: { email: data.email },
+    data: {
+      emailVerificationToken: data.emailVerificationToken,
+      emailVerificationTokenExpires: data.emailVerificationTokenExpires,
+    },
+  });
+};
+const findByEmail = async (email: string) => {
+  return await prisma.user.findUnique({
+    where: {
+      email,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      isVerified: true,
+    },
+  });
+};
 
-export const userRepository = { userExists, createUser };
+const findById = async (id: string) => {
+  return await prisma.user.findUnique({
+    where: {
+      id,
+    },
+    select: {},
+  });
+};
+
+const findByEmailVerificationToken = async (token: string) => {
+  return await prisma.user.findFirst({
+    where: {
+      emailVerificationToken: token,
+    },
+    select: {
+      id: true,
+      emailVerificationTokenExpires: true,
+    },
+  });
+};
+const findByPasswordResetToken = async (token: string) => {
+  return await prisma.user.findFirst({
+    where: {
+      passwordResetToken: token,
+    },
+    select: {
+      id: true,
+      passwordResetTokenExpires: true,
+    },
+  });
+};
+
+const updateUser = async (id: string, data: Prisma.UserUpdateInput) => {
+  await prisma.user.update({
+    where: {
+      id,
+    },
+    data: { ...data },
+  });
+};
+export const userRepository = {
+  createUser,
+  findByEmail,
+  updateEmailVerificationTokenAndExpiry,
+  findByEmailVerificationToken,
+  findByPasswordResetToken,
+  updateUser,
+};
+
+// userRepository.findByEmail(email)
+// userRepository.findById(id)
+
+// userRepository.findByEmailVerificationToken(token)
+// userRepository.findByPasswordResetToken(token)
+
+// userRepository.createUser(data)
+// userRepository.updateUser(id, data)

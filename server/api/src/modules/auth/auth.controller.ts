@@ -1,10 +1,14 @@
 import type { RequestHandler } from 'express';
-import type { signUpInput } from './auth.schema.js';
+import type {
+  EmailInput,
+  SignUpInput,
+  VerifyUserInput,
+} from './auth.schema.js';
 import { authService } from './auth.service.js';
 import { ApiResponse } from '../../utils/api-output.util.js';
 export const signUp: RequestHandler = async (req, res, next) => {
   try {
-    const body = req.body as signUpInput;
+    const body = req.body as SignUpInput;
     const user = await authService.signUp(body);
     res
       .status(200)
@@ -16,12 +20,41 @@ export const signUp: RequestHandler = async (req, res, next) => {
         ),
       );
   } catch (error) {
-    // console.log(error)
     next(error);
   }
 };
-// export const verifyUser: RequestHandler = async (req, res) => {};
-// export const resendverificationToken: RequestHandler = async (req, res) => {};
+export const resendverificationToken: RequestHandler = async (
+  req,
+  res,
+  next,
+) => {
+  try {
+    const body = req.body as EmailInput;
+    await authService.resendVerificationToken(body);
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          null,
+          'Verification email resent, Check your email',
+        ),
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+export const verifyUser: RequestHandler = async (req, res, next) => {
+  try {
+    const params = req.params as VerifyUserInput;
+    await authService.verifyUser(params);
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, 'User verified successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
 // export const signIn: RequestHandler = async (req, res) => {};
 // export const logout: RequestHandler = async (req, res) => {};
 // export const logoutFromAllDevices: RequestHandler = async (req, res) => {};

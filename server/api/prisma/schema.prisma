@@ -25,8 +25,8 @@ model User {
   emailVerificationToken        String?
   emailVerificationTokenExpires DateTime?
   // reset password
-  resetPasswordToken            String?
-  resetPasswordTokenExpires     DateTime?
+  passwordResetToken            String?
+  passwordResetTokenExpires     DateTime?
   // TimeStamps
   createdAt                     DateTime      @default(now())
   updatedAt                     DateTime      @updatedAt

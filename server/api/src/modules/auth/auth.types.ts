@@ -1,3 +1,4 @@
+
 export type CreateUserInput = {
   name: string;
   email: string;
@@ -5,6 +6,10 @@ export type CreateUserInput = {
   emailVerificationToken: string;
   emailVerificationTokenExpires: Date;
 };
-export type UserExistsInput = {
+
+
+export type UpdateEmailVerificationTokenAndExpiryInput = {
   email: string;
+  emailVerificationToken: string;
+  emailVerificationTokenExpires: Date;
 };
