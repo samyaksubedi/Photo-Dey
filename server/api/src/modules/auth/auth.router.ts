@@ -2,11 +2,13 @@ import express from 'express';
 import { validate } from '../../middlewares/validate.middleware.js';
 import {
   resendVerificationTokenSchema,
+  signInSchema,
   signUpSchema,
   verifyUserSchema,
 } from './auth.schema.js';
 import {
   resendverificationToken,
+  signIn,
   signUp,
   verifyUser,
 } from './auth.controller.js';
@@ -28,7 +30,7 @@ router.get(
   validate({ schema: verifyUserSchema, source: 'params' }),
   verifyUser,
 );
-// router.post('/signIn');
+router.post('/signIn', validate({ schema: signInSchema }), signIn);
 // router.post('/logout');
 // router.post('/logout-all');
 // router.get('/indo-loggedIn-devices');

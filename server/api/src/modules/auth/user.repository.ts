@@ -1,13 +1,13 @@
 // Handles communication with database using ORM
 import type {
-  CreateUserInput,
+  
   UpdateEmailVerificationTokenAndExpiryInput,
 } from './auth.types.js';
 import type { Prisma } from '../../generated/prisma/client.js';
 
 import { prisma } from '../../db/db.client.js';
 
-const createUser = async (data: CreateUserInput) => {
+const createUser = async (data: Prisma.UserCreateInput) => {
   return await prisma.user.create({
     data: {
       ...data,
@@ -41,6 +41,7 @@ const findByEmail = async (email: string) => {
       name: true,
       email: true,
       isVerified: true,
+      passwordHash: true,
     },
   });
 };

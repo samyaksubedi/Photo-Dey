@@ -1,11 +1,14 @@
 import type { RequestHandler } from 'express';
 import type {
   EmailInput,
+  SignInInput,
   SignUpInput,
   VerifyUserInput,
 } from './auth.schema.js';
 import { authService } from './auth.service.js';
 import { ApiResponse } from '../../utils/api-output.util.js';
+import { getDeviceInfo } from './auth.device.js';
+import { envVariables } from '../../configs/env.config.js';
 export const signUp: RequestHandler = async (req, res, next) => {
   try {
     const body = req.body as SignUpInput;
@@ -55,7 +58,35 @@ export const verifyUser: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-// export const signIn: RequestHandler = async (req, res) => {};
+export const signIn: RequestHandler = async (req, res, next) => {
+  try {
+    const body = req.body as SignInInput;
+    const ipAddress = req.ip ?? 'Unknown';
+
+    const deviceInfo = getDeviceInfo(req.headers['user-agent'] ?? '');
+
+    const { accessToken, refreshToken, refreshTokenExpires, user } =
+      await authService.signIn({ ...body, deviceInfo, ipAddress });
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: envVariables.NODE_ENV == 'production',
+      sameSite: 'strict',
+      expires: refreshTokenExpires,
+    });
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { accessToken, user },
+          'User loggedIn successfully',
+        ),
+      );
+  } catch (error) {
+    next(error);
+  }
+};
 // export const logout: RequestHandler = async (req, res) => {};
 // export const logoutFromAllDevices: RequestHandler = async (req, res) => {};
 // export const getAllLoggedInDeviceInfo: RequestHandler = async (req, res) => {};

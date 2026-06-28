@@ -15,9 +15,13 @@ export const generateAccessToken = (
   email: string,
   sessiionId: string,
 ) => {
-  jwt.sign({ userId, email, sessiionId }, envVariables.ACCESS_TOKEN_SECRET, {
-    expiresIn: '15m',
-  });
+  return jwt.sign(
+    { userId, email, sessiionId },
+    envVariables.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: '15m',
+    },
+  );
 };
 
 export const generateRefreshToken = () => {

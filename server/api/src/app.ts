@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cors());
-
+app.set('trust proxy', true); // Get Real IP Address
 app.get('/', (req, res) => {
   res.send({ status: 'Healthy' });
 });
