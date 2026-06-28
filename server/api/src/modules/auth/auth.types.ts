@@ -26,3 +26,9 @@ export type SignInServiceInput = {
   ipAddress: string;
   deviceInfo: DeviceInfo;
 };
+
+export type AccessTokenPayload = {
+  id: string;
+  email: string;
+  sessionId: string;
+};

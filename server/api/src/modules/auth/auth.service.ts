@@ -109,7 +109,9 @@ const signIn = async (data: SignInServiceInput) => {
     refreshTokenExpires,
   };
 };
-// const logout = async (data) => {};
+const logout = async (data: { sessionId: string }) => {
+  await userSessionRepository.deleteUserSession(data.sessionId);
+};
 // const logoutFromAllDevices = async (data) => {};
 // const refresh = async (data) => {};
 // const getAllLoggedInDeviceInfo = async (data) => {};
@@ -120,4 +122,5 @@ export const authService = {
   resendVerificationToken,
   verifyUser,
   signIn,
+  logout,
 };

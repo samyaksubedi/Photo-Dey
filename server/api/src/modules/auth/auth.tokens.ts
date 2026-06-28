@@ -13,10 +13,10 @@ export const generateEmailVerificationToken = () => {
 export const generateAccessToken = (
   userId: string,
   email: string,
-  sessiionId: string,
+  sessionId: string,
 ) => {
   return jwt.sign(
-    { userId, email, sessiionId },
+    { userId, email, sessionId },
     envVariables.ACCESS_TOKEN_SECRET,
     {
       expiresIn: '15m',

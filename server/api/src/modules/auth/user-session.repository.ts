@@ -10,7 +10,14 @@ const createUserSession = async (
     },
   });
 };
-
+const deleteUserSession = async (id: string) => {
+  await prisma.userSession.delete({
+    where: {
+      id,
+    },
+  });
+};
 export const userSessionRepository = {
   createUserSession,
+  deleteUserSession,
 };

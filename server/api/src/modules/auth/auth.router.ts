@@ -7,11 +7,13 @@ import {
   verifyUserSchema,
 } from './auth.schema.js';
 import {
+  logout,
   resendverificationToken,
   signIn,
   signUp,
   verifyUser,
 } from './auth.controller.js';
+import { authenticateUser } from '../../middlewares/auth.middleware.js';
 
 export const router = express.Router();
 
@@ -31,7 +33,7 @@ router.get(
   verifyUser,
 );
 router.post('/signIn', validate({ schema: signInSchema }), signIn);
-// router.post('/logout');
+router.post('/logout', authenticateUser, logout);
 // router.post('/logout-all');
 // router.get('/indo-loggedIn-devices');
 // router.post('/refresh');

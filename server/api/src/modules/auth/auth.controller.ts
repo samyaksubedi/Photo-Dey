@@ -87,7 +87,22 @@ export const signIn: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-// export const logout: RequestHandler = async (req, res) => {};
+export const logout: RequestHandler = async (req, res, next) => {
+  try {
+    const { sessionId } = req.user;
+    await authService.logout({ sessionId });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: envVariables.NODE_ENV == 'production',
+      sameSite: 'strict',
+    });
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, 'User logged out successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
 // export const logoutFromAllDevices: RequestHandler = async (req, res) => {};
 // export const getAllLoggedInDeviceInfo: RequestHandler = async (req, res) => {};
 // export const refresh: RequestHandler = async (req, res) => {};
