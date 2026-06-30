@@ -96,7 +96,12 @@ const signIn = async (data: SignInServiceInput) => {
     deviceInfo: data.deviceInfo,
     ipAddress: data.ipAddress,
   });
-  const accessToken = generateAccessToken(user.id, user.email, userSession.id);
+
+  const accessToken = generateAccessToken({
+    email: user.email,
+    id: user.id,
+    sessionId: userSession.id,
+  });
 
   return {
     user: {
@@ -112,10 +117,48 @@ const signIn = async (data: SignInServiceInput) => {
 const logout = async (data: { sessionId: string }) => {
   await userSessionRepository.deleteUserSession(data.sessionId);
 };
-// const logoutFromAllDevices = async (data) => {};
-// const refresh = async (data) => {};
-// const getAllLoggedInDeviceInfo = async (data) => {};
-// const getMe = async (data) => {};
+const logoutFromAllDevices = async (data: { userId: string }) => {
+  const deleteBatch = await userSessionRepository.deleteUserSessions(
+    data.userId,
+  );
+  return deleteBatch.count;
+};
+const refresh = async (data: { refreshToken: string }) => {
+  const userSession = await userSessionRepository.findByRefreshToken(
+    data.refreshToken,
+  );
+
+  if (!userSession || userSession.refreshTokenExpires < new Date()) {
+    throw new ApiError(
+      400,
+      'Invalid or Expired refreshToken, Please login again!',
+    );
+  }
+  const user = await userRepository.findById(userSession.userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+  await userSessionRepository.updateUserSession(userSession.id, {
+    lastUsedAt: new Date(),
+  });
+  const accessToken = generateAccessToken({
+    email: user.email,
+    id: user.id,
+    sessionId: userSession.id,
+  });
+
+  return accessToken;
+};
+const getAllLoggedInDeviceInfo = async (data: { userId: string }) => {
+  const sessionInfo = await userSessionRepository.getAllUserSessionInfo(
+    data.userId,
+  );
+  return sessionInfo;
+};
+const getMe = async (data: { userId: string }) => {
+  const user = await userRepository.findById(data.userId);
+  return user;
+};
 
 export const authService = {
   signUp,
@@ -123,4 +166,8 @@ export const authService = {
   verifyUser,
   signIn,
   logout,
+  logoutFromAllDevices,
+  getAllLoggedInDeviceInfo,
+  refresh,
+  getMe,
 };

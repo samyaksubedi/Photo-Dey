@@ -44,7 +44,6 @@ const authenticateUser: RequestHandler = async (req, res, next) => {
     if (!session) {
       throw new ApiError(401, 'Session expired or revoked');
     }
-
     req.user = {
       id: decoded.id,
       email: decoded.email,

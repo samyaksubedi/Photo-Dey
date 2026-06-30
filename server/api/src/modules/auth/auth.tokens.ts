@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { envVariables } from '../../configs/env.config.js';
+import type { AccessTokenPayload } from './auth.types.js';
 
 export const generateEmailVerificationToken = () => {
   const emailVerificationToken = crypto.randomBytes(32).toString('hex');
@@ -10,18 +11,14 @@ export const generateEmailVerificationToken = () => {
   return { emailVerificationToken, emailVerificationTokenExpires };
 };
 
-export const generateAccessToken = (
-  userId: string,
-  email: string,
-  sessionId: string,
-) => {
-  return jwt.sign(
-    { userId, email, sessionId },
-    envVariables.ACCESS_TOKEN_SECRET,
-    {
-      expiresIn: '15m',
-    },
-  );
+export const generateAccessToken = ({
+  email,
+  id,
+  sessionId,
+}: AccessTokenPayload) => {
+  return jwt.sign({ id, email, sessionId }, envVariables.ACCESS_TOKEN_SECRET, {
+    expiresIn: '15m',
+  });
 };
 
 export const generateRefreshToken = () => {

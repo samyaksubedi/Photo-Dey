@@ -1,8 +1,5 @@
 // Handles communication with database using ORM
-import type {
-  
-  UpdateEmailVerificationTokenAndExpiryInput,
-} from './auth.types.js';
+import type { UpdateEmailVerificationTokenAndExpiryInput } from './auth.types.js';
 import type { Prisma } from '../../generated/prisma/client.js';
 
 import { prisma } from '../../db/db.client.js';
@@ -51,7 +48,12 @@ const findById = async (id: string) => {
     where: {
       id,
     },
-    select: {},
+    select: {
+      id: true,
+      email: true,
+      isVerified: true,
+      name: true,
+    },
   });
 };
 
@@ -86,6 +88,7 @@ const updateUser = async (id: string, data: Prisma.UserUpdateInput) => {
     data: { ...data },
   });
 };
+
 export const userRepository = {
   createUser,
   findByEmail,
@@ -93,10 +96,10 @@ export const userRepository = {
   findByEmailVerificationToken,
   findByPasswordResetToken,
   updateUser,
+  findById,
 };
 
 // userRepository.findByEmail(email)
-// userRepository.findById(id)
 
 // userRepository.findByEmailVerificationToken(token)
 // userRepository.findByPasswordResetToken(token)

@@ -7,7 +7,11 @@ import {
   verifyUserSchema,
 } from './auth.schema.js';
 import {
+  getAllLoggedInDeviceInfo,
+  getMe,
   logout,
+  logoutFromAllDevices,
+  refresh,
   resendverificationToken,
   signIn,
   signUp,
@@ -34,7 +38,11 @@ router.get(
 );
 router.post('/signIn', validate({ schema: signInSchema }), signIn);
 router.post('/logout', authenticateUser, logout);
-// router.post('/logout-all');
-// router.get('/indo-loggedIn-devices');
-// router.post('/refresh');
-// router.get('/me');
+router.post('/logout-all', authenticateUser, logoutFromAllDevices);
+router.get(
+  '/info-loggedIn-devices',
+  authenticateUser,
+  getAllLoggedInDeviceInfo,
+);
+router.post('/refresh', refresh);
+router.get('/me', authenticateUser, getMe);
