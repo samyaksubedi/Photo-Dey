@@ -3,6 +3,8 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import { router as authRouter } from './modules/auth/auth.router.js';
+import { router as eventsRouter } from './modules/events/events.router.js';
+
 const app = express();
 
 app.use(express.json());
@@ -14,6 +16,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/events', eventsRouter);
 app.use(errorMiddleware); // Global Error Middleware - Should always be in the end of the middleware
 
 export { app };
