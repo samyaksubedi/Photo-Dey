@@ -6,11 +6,13 @@ import { envVariables } from './configs/env.config.js';
 import { logger } from './configs/logger.config.js';
 import { testPostgresConnection } from './db/db.client.js';
 import { testMailTransporter } from './configs/mail.config.js';
+import { testRedisConnection } from './configs/redis.config.js';
 
 const PORT = envVariables.PORT;
 async function testDependency() {
   testMailTransporter();
   await testPostgresConnection();
+  await testRedisConnection();
 }
 async function server() {
   await testDependency();

@@ -18,11 +18,11 @@ const sendEmail = async (data: SendMailInput) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    logger.info('Email sent successfully', {
-      to: data.to,
-      subject: data.subject,
-      messageId: info.messageId,
-    });
+    // logger.info('Email sent successfully', {
+    //   to: data.to,
+    //   subject: data.subject,
+    //   messageId: info.messageId,
+    // });
     return info;
   } catch (error) {
     if (error instanceof Error) {

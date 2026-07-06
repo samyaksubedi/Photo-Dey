@@ -1,6 +1,7 @@
+import { enqueueEmail } from '../../jobs/email/email.producer.js';
 import { ApiError } from '../../utils/api-output.util.js';
 import { comparePassword, hashPassword } from './auth.crypto.js';
-import { resendVerificationEmail, sendWelcomeEmail } from './auth.email.js';
+// import { resendVerificationEmail, sendWelcomeEmail } from './auth.email.js';
 import type {
   EmailInput,
   SignUpInput,
@@ -30,7 +31,8 @@ const signUp = async (data: SignUpInput) => {
     emailVerificationToken,
     emailVerificationTokenExpires,
   });
-  await sendWelcomeEmail({
+  await enqueueEmail({
+    emailType: 'sendWelcomeEmail',
     to: data.email,
     name: data.name,
     emailVerificationToken: emailVerificationToken,
@@ -53,8 +55,9 @@ const resendVerificationToken = async (data: EmailInput) => {
     emailVerificationToken: emailVerificationToken,
     emailVerificationTokenExpires: emailVerificationTokenExpires,
   });
-  await resendVerificationEmail({
-    emailVerificationToken,
+  await enqueueEmail({
+    emailType: 'resendVerificationEmail',
+    emailVerificationToken: emailVerificationToken,
     name: user.name,
     to: data.email,
   });
@@ -62,7 +65,7 @@ const resendVerificationToken = async (data: EmailInput) => {
 const verifyUser = async (data: VerifyUserInput) => {
   const user = await userRepository.findByEmailVerificationToken(data.token);
   if (!user) {
-    throw new ApiError(400, 'Verification line invalid');
+    throw new ApiError(400, 'Verification link invalid');
   }
   if (
     !user.emailVerificationTokenExpires ||

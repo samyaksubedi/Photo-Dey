@@ -1,6 +1,5 @@
 import { prisma } from '../../db/db.client.js';
 import type { Prisma } from '../../generated/prisma/client.js';
-import { getEvent } from './events.controller.js';
 
 const createEvent = async (data: Prisma.EventCreateInput) => {
   return await prisma.event.create({
@@ -94,7 +93,6 @@ const getStatus = async (id: string) => {
 export const eventRepository = {
   createEvent,
   getEvents,
-  getEvent,
   findById,
   deleteById,
   updateEvent,
