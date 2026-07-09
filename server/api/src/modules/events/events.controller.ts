@@ -1,14 +1,29 @@
 import type { RequestHandler } from 'express';
 import { eventServices } from './events.service.js';
 import type {
+  CreateEventBody,
   DeleteEventInput,
   GetEventInput,
-  GetStatusSchema,
+  GetStatusInput,
 } from './events.schema.js';
-import { ApiResponse } from '../../utils/api-output.util.js';
+import { ApiError, ApiResponse } from '../../utils/api-output.util.js';
 
 export const createEvents: RequestHandler = async (req, res, next) => {
   try {
+    const photos = req.files as Express.Multer.File[];
+    const body = req.body as CreateEventBody;
+    const userId = req.user.id;
+    if (!Array.isArray(photos) || photos.length === 0) {
+      throw new ApiError(400, 'At least one photo is required');
+    }
+    const event = await eventServices.createEvents({
+      name: body.name,
+      photos,
+      userId,
+    });
+    return res
+      .status(200)
+      .json(new ApiResponse(200, { event }, 'Event created successfully'));
   } catch (error) {
     next(error);
   }
@@ -59,7 +74,7 @@ export const deleteEvent: RequestHandler = async (req, res, next) => {
 };
 export const getStatus: RequestHandler = async (req, res, next) => {
   try {
-    const params = req.params as GetStatusSchema;
+    const params = req.params as GetStatusInput;
     const status = await eventServices.getStatus({ eventId: params.eventId });
     return res
       .status(200)

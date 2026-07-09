@@ -1,4 +1,7 @@
+import { prisma } from '../../db/db.client.js';
+import { enqueueUpload } from '../../jobs/upload/upload.producer.js';
 import { ApiError } from '../../utils/api-output.util.js';
+import { photoRepository } from '../photos/photos.repository.js';
 import { eventRepository } from './events.repository.js';
 
 const getEvents = async (data: { userId: string }) => {
@@ -9,10 +12,38 @@ const getEvents = async (data: { userId: string }) => {
   }
   return events;
 };
-// const createEvents = async (data) => {
-//   // Create the event
-//   //   await eventRepository.createEvent()
-// };
+type CreateEventsInput = {
+  photos: Express.Multer.File[];
+  userId: string;
+  name: string;
+};
+const createEvents = async (data: CreateEventsInput) => {
+  // Create the event
+
+  const event = await eventRepository.createEvent({
+    name: data.name,
+    userId: data.userId,
+    totalPhotos: data.photos.length,
+  });
+  const photos = data.photos;
+  for (const photo of photos) {
+    const newPhoto = await photoRepository.createPhoto({
+      localPath: photo.path,
+      eventId: event.id,
+    });
+    await enqueueUpload({
+      eventId: event.id,
+      filePath: photo.path,
+      photoId: newPhoto.id,
+      type: 'image',
+    });
+  }
+  await eventRepository.updateEvent(event.id, {
+    status: 'PROCESSING',
+  });
+
+  return event;
+};
 const getEvent = async (data: { eventId: string }) => {
   //  Get all details for a single events
   const event = await eventRepository.findById(data.eventId);
@@ -38,7 +69,7 @@ const getStatus = async (data: { eventId: string }) => {
 };
 export const eventServices = {
   getEvents,
-  // createEvents,
+  createEvents,
   getEvent,
   deleteEvent,
   getStatus,

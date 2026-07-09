@@ -75,7 +75,8 @@ model Photo {
   eventId           String
   localPath         String?
   status            PhotoStatus       @default(PENDING_UPLOAD)
-  publicUrl         String?
+  secureUrl         String?
+  publicId          String?
   guestPhotoMatches GuestPhotoMatch[]
 
   @@index([eventId])

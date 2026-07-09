@@ -1,7 +1,7 @@
 import { prisma } from '../../db/db.client.js';
 import type { Prisma } from '../../generated/prisma/client.js';
 
-const createEvent = async (data: Prisma.EventCreateInput) => {
+const createEvent = async (data: Prisma.EventUncheckedCreateInput) => {
   return await prisma.event.create({
     data: {
       ...data,
