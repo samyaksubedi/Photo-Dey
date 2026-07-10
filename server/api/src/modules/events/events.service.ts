@@ -1,4 +1,3 @@
-import { prisma } from '../../db/db.client.js';
 import { enqueueUpload } from '../../jobs/upload/upload.producer.js';
 import { ApiError } from '../../utils/api-output.util.js';
 import { photoRepository } from '../photos/photos.repository.js';
@@ -7,9 +6,6 @@ import { eventRepository } from './events.repository.js';
 const getEvents = async (data: { userId: string }) => {
   //  Get all events  of the user
   const events = await eventRepository.getEvents(data.userId);
-  if (!events) {
-    return null;
-  }
   return events;
 };
 type CreateEventsInput = {
@@ -44,26 +40,37 @@ const createEvents = async (data: CreateEventsInput) => {
 
   return event;
 };
-const getEvent = async (data: { eventId: string }) => {
+const getEvent = async (data: { eventId: string; userId: string }) => {
   //  Get all details for a single events
-  const event = await eventRepository.findById(data.eventId);
+  const event = await eventRepository.findByIdAndUserId(
+    data.eventId,
+    data.userId,
+  );
   if (!event) {
     throw new ApiError(404, 'Event not found');
   }
   return event;
 };
-const deleteEvent = async (data: { eventId: string }) => {
-  const event = await eventRepository.findById(data.eventId);
+const deleteEvent = async (data: { eventId: string; userId: string }) => {
+  const event = await eventRepository.findByIdAndUserId(
+    data.eventId,
+    data.userId,
+  );
   if (!event) {
     throw new ApiError(404, 'Event not found');
   }
+
   await eventRepository.deleteById(data.eventId);
 };
-const getStatus = async (data: { eventId: string }) => {
-  const event = await eventRepository.findById(data.eventId);
+const getStatus = async (data: { eventId: string; userId: string }) => {
+  const event = await eventRepository.findByIdAndUserId(
+    data.eventId,
+    data.userId,
+  );
   if (!event) {
     throw new ApiError(404, 'Event not found');
   }
+
   const status = await eventRepository.getStatus(data.eventId);
   return status;
 };

@@ -22,8 +22,8 @@ export const createEvents: RequestHandler = async (req, res, next) => {
       userId,
     });
     return res
-      .status(200)
-      .json(new ApiResponse(200, { event }, 'Event created successfully'));
+      .status(201)
+      .json(new ApiResponse(201, { event }, 'Event created successfully'));
   } catch (error) {
     next(error);
   }
@@ -32,17 +32,6 @@ export const getEvents: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const events = await eventServices.getEvents({ userId });
-    if (!events) {
-      return res
-        .status(200)
-        .json(
-          new ApiResponse(
-            200,
-            null,
-            'No any events found . Please Create one !',
-          ),
-        );
-    }
     return res
       .status(200)
       .json(new ApiResponse(200, { events }, 'Events fetched successfully !'));
@@ -53,7 +42,11 @@ export const getEvents: RequestHandler = async (req, res, next) => {
 export const getEvent: RequestHandler = async (req, res, next) => {
   try {
     const params = req.params as GetEventInput;
-    const event = await eventServices.getEvent({ eventId: params.eventId });
+    const userId = req.user.id;
+    const event = await eventServices.getEvent({
+      eventId: params.eventId,
+      userId: userId,
+    });
     return res
       .status(200)
       .json(new ApiResponse(200, { event }, 'Event fetched successfully '));
@@ -64,7 +57,11 @@ export const getEvent: RequestHandler = async (req, res, next) => {
 export const deleteEvent: RequestHandler = async (req, res, next) => {
   try {
     const params = req.params as DeleteEventInput;
-    await eventServices.deleteEvent({ eventId: params.eventId });
+    const userId = req.user.id;
+    await eventServices.deleteEvent({
+      eventId: params.eventId,
+      userId: userId,
+    });
     return res
       .status(200)
       .json(new ApiResponse(200, null, 'Event deleted successfully'));
@@ -75,7 +72,11 @@ export const deleteEvent: RequestHandler = async (req, res, next) => {
 export const getStatus: RequestHandler = async (req, res, next) => {
   try {
     const params = req.params as GetStatusInput;
-    const status = await eventServices.getStatus({ eventId: params.eventId });
+    const userId = req.user.id;
+    const status = await eventServices.getStatus({
+      eventId: params.eventId,
+      userId: userId,
+    });
     return res
       .status(200)
       .json(new ApiResponse(200, { status }, 'Status fetched successfully'));

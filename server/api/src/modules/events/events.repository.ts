@@ -43,6 +43,7 @@ const findById = async (id: string) => {
     },
     select: {
       id: true,
+      userId: true,
       name: true,
       totalPhotos: true,
       uploadedPhotos: true,
@@ -55,7 +56,14 @@ const findById = async (id: string) => {
     },
   });
 };
-
+const findByIdAndUserId = async (eventId: string, userId: string) => {
+  return prisma.event.findFirst({
+    where: {
+      id: eventId,
+      userId,
+    },
+  });
+};
 const deleteById = async (id: string) => {
   return await prisma.event.delete({
     where: {
@@ -94,6 +102,7 @@ export const eventRepository = {
   createEvent,
   getEvents,
   findById,
+  findByIdAndUserId,
   deleteById,
   updateEvent,
   getStatus,

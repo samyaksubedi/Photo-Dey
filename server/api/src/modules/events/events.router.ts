@@ -9,7 +9,12 @@ import {
   getStatus,
 } from './events.controller.js';
 import { upload } from '../../middlewares/upload.middleware.js';
-import { createEventSchema } from './events.schema.js';
+import {
+  createEventSchema,
+  deleteEventSchema,
+  getEventSchema,
+  getStatusSchema,
+} from './events.schema.js';
 
 export const router = express.Router();
 
@@ -21,6 +26,21 @@ router.post(
   validate({ schema: createEventSchema }),
   createEvents,
 );
-router.get('/:id', authenticateUser, getEvent);
-router.delete('/:id', authenticateUser, deleteEvent);
-router.get('/:id/status', authenticateUser, getStatus);
+router.get(
+  '/:eventId',
+  authenticateUser,
+  validate({ schema: getEventSchema, source: 'params' }),
+  getEvent,
+);
+router.delete(
+  '/:eventId',
+  authenticateUser,
+  validate({ schema: deleteEventSchema, source: 'params' }),
+  deleteEvent,
+);
+router.get(
+  '/:eventId/status',
+  authenticateUser,
+  validate({ schema: getStatusSchema, source: 'params' }),
+  getStatus,
+);
