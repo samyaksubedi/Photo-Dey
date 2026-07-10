@@ -6,6 +6,7 @@ import { uploadSourceFile } from '../../modules/events/events.upload.js';
 import { eventRepository } from '../../modules/events/events.repository.js';
 import { ApiError } from '../../utils/api-output.util.js';
 import { photoRepository } from '../../modules/photos/photos.repository.js';
+import { enqueueAi } from '../ai/ai.producer.js';
 
 export type ProcessUploadQueueInput = {
   eventId: string;
@@ -41,7 +42,7 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
     secureUrl,
   });
 
-  //TODO Push the photo to ai queue to process the photos
+  await enqueueAi({ eventId: data.eventId, photoId: data.photoId, secureUrl }); //  Python worker picks the job and starts processing the job (Generate faceembedding bla bla ....)--> It's kinda worker pushing another job into another queue haha
 };
 const uploadWorker = new Worker(UPLOAD_QUEUE_KEY, processUploadQueue, {
   connection: redisConnection,

@@ -59,7 +59,7 @@ const deleteEvent = async (data: { eventId: string; userId: string }) => {
   if (!event) {
     throw new ApiError(404, 'Event not found');
   }
-
+  // TODO Delete all photo from cloudinary too
   await eventRepository.deleteById(data.eventId);
 };
 const getStatus = async (data: { eventId: string; userId: string }) => {
