@@ -34,7 +34,7 @@ const createEvents = async (data: CreateEventsInput) => {
       type: 'image',
     });
   }
-  await eventRepository.updateEvent(event.id, {
+  await eventRepository.updateEvent(event.id,data.userId, {
     status: 'PROCESSING',
   });
 

@@ -16,6 +16,7 @@ import {
   getStatusSchema,
 } from './events.schema.js';
 
+
 export const router = express.Router();
 
 router.get('/', authenticateUser, getEvents);
@@ -40,6 +41,12 @@ router.delete(
 );
 router.get(
   '/:eventId/status',
+  authenticateUser,
+  validate({ schema: getStatusSchema, source: 'params' }),
+  getStatus,
+);
+router.get(
+  '/:eventId/',
   authenticateUser,
   validate({ schema: getStatusSchema, source: 'params' }),
   getStatus,

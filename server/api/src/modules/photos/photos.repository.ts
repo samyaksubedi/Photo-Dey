@@ -14,10 +14,16 @@ const createPhoto = async (data: Prisma.PhotoUncheckedCreateInput) => {
   });
 };
 
-const getPhotos = async (eventId: string) => {
+const getPhotosByEventIdAndUserId = async (eventId: string, userId: string) => {
   return await prisma.photo.findMany({
-    where: { eventId },
+    where: {
+      eventId,
+      event: {
+        userId,
+      },
+    },
     select: {
+      id: true,
       publicId: true,
       secureUrl: true,
       status: true,
@@ -25,10 +31,13 @@ const getPhotos = async (eventId: string) => {
     },
   });
 };
-const findById = async (id: string) => {
-  return await prisma.photo.findUnique({
+const findByIdAndUserId = async (id: string, userId: string) => {
+  return await prisma.photo.findFirst({
     where: {
       id,
+      event: {
+        userId,
+      },
     },
     select: {
       id: true,
@@ -48,11 +57,21 @@ const updatePhoto = async (id: string, data: Prisma.PhotoUpdateInput) => {
     },
   });
 };
+
+const deleteById = async (id: string) => {
+  await prisma.photo.delete({
+    where: {
+      id,
+    },
+  });
+};
+const getStatus = async (id: string) => {};
+
 export const photoRepository = {
   createPhoto,
-  getPhotos,
-  findById,
-  // deleteById,
+  getPhotosByEventIdAndUserId,
+  findByIdAndUserId,
+  deleteById,
   updatePhoto,
-  // getStatus,
+  getStatus,
 };

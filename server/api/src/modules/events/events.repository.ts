@@ -72,10 +72,15 @@ const deleteById = async (id: string) => {
   });
 };
 
-const updateEvent = async (id: string, data: Prisma.EventUpdateInput) => {
+const updateEvent = async (
+  id: string,
+  userId: string,
+  data: Prisma.EventUpdateInput,
+) => {
   await prisma.event.update({
     where: {
       id,
+      userId,
     },
     data: {
       ...data,
