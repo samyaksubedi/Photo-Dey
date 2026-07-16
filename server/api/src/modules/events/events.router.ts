@@ -2,7 +2,7 @@ import express from 'express';
 import { validate } from '../../middlewares/validate.middleware.js';
 import { authenticateUser } from '../../middlewares/auth.middleware.js';
 import {
-  createEvents,
+  createEvent,
   deleteEvent,
   getEvent,
   getEvents,
@@ -25,7 +25,7 @@ router.post(
   authenticateUser,
   upload.array('photos', 1000),
   validate({ schema: createEventSchema }),
-  createEvents,
+  createEvent,
 );
 router.get(
   '/:eventId',

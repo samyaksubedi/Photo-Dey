@@ -8,12 +8,12 @@ const getEvents = async (data: { userId: string }) => {
   const events = await eventRepository.getEvents(data.userId);
   return events;
 };
-type CreateEventsInput = {
+type CreateEventInput = {
   photos: Express.Multer.File[];
   userId: string;
   name: string;
 };
-const createEvents = async (data: CreateEventsInput) => {
+const createEvent = async (data: CreateEventInput) => {
   // Create the event
 
   const event = await eventRepository.createEvent({
@@ -77,7 +77,7 @@ const getStatus = async (data: { eventId: string; userId: string }) => {
 };
 export const eventServices = {
   getEvents,
-  createEvents,
+  createEvent,
   getEvent,
   deleteEvent,
   getStatus,

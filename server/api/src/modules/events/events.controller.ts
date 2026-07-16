@@ -8,7 +8,7 @@ import type {
 } from './events.schema.js';
 import { ApiError, ApiResponse } from '../../utils/api-output.util.js';
 
-export const createEvents: RequestHandler = async (req, res, next) => {
+export const createEvent: RequestHandler = async (req, res, next) => {
   try {
     const photos = req.files as Express.Multer.File[];
     const body = req.body as CreateEventBody;
@@ -16,7 +16,7 @@ export const createEvents: RequestHandler = async (req, res, next) => {
     if (!Array.isArray(photos) || photos.length === 0) {
       throw new ApiError(400, 'At least one photo is required');
     }
-    const event = await eventServices.createEvents({
+    const event = await eventServices.createEvent({
       name: body.name,
       photos,
       userId,
