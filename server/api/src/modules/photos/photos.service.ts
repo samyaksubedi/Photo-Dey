@@ -1,5 +1,7 @@
+import { logger } from '../../configs/logger.config.js';
 import { ApiError } from '../../utils/api-output.util.js';
 import { eventRepository } from '../events/events.repository.js';
+import { deleteSourceFile } from '../events/events.upload.js';
 
 import { photoRepository } from './photos.repository.js';
 
@@ -35,7 +37,11 @@ const deletePhoto = async (data: { userId: string; photoId: string }) => {
   if (!photo) {
     throw new ApiError(404, 'Photo not found');
   }
-  //TODO Delte from cloudinary too
+  if (photo.publicId) {
+    await deleteSourceFile({ publicId: photo.publicId, type: 'image' });
+  } else {
+    logger.error('PublicId not found while deleting photo', { ...photo });
+  }
   await photoRepository.deleteById(data.photoId);
 };
 export const photoServices = { getPhoto, getPhotos, deletePhoto };

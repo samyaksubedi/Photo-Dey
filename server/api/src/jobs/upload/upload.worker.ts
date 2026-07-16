@@ -9,6 +9,7 @@ import { photoRepository } from '../../modules/photos/photos.repository.js';
 import { enqueueAi } from '../ai/ai.producer.js';
 
 export type ProcessUploadQueueInput = {
+  userId: string;
   eventId: string;
   photoId: string;
   filePath: string;
@@ -25,7 +26,11 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
     type: data.type,
   });
   const event = await eventRepository.findById(data.eventId);
-  const photo = await photoRepository.findById(data.photoId);
+  // const photo = await photoRepository.findById(data.photoId);
+  const photo = await photoRepository.findByIdAndUserId(
+    data.photoId,
+    data.userId,
+  );
   if (!event) {
     return '';
   }
@@ -33,7 +38,7 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
     return '';
   }
   const uploadedPhotos = event.uploadedPhotos;
-  await eventRepository.updateEvent(data.eventId, {
+  await eventRepository.updateEvent(data.eventId, data.userId, {
     uploadedPhotos: uploadedPhotos + 1,
   });
   await photoRepository.updatePhoto(data.photoId, {
@@ -71,12 +76,12 @@ uploadWorker.on('failed', async (job, err) => {
   const failedPhotos = event.failedPhotos;
   const totalPhotos = event.totalPhotos;
   if (failedPhotos === totalPhotos - 1) {
-    await eventRepository.updateEvent(data.eventId, {
+    await eventRepository.updateEvent(data.eventId, data.userId, {
       status: 'FAILED',
       failedPhotos: failedPhotos + 1,
     });
   } else {
-    await eventRepository.updateEvent(data.eventId, {
+    await eventRepository.updateEvent(data.eventId, data.userId, {
       failedPhotos: failedPhotos + 1,
       status: 'PARTIAL_FAILURE',
     });

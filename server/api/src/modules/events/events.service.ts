@@ -29,12 +29,13 @@ const createEvents = async (data: CreateEventsInput) => {
     });
     await enqueueUpload({
       eventId: event.id,
+      userId: data.userId,
       filePath: photo.path,
       photoId: newPhoto.id,
       type: 'image',
     });
   }
-  await eventRepository.updateEvent(event.id,data.userId, {
+  await eventRepository.updateEvent(event.id, data.userId, {
     status: 'PROCESSING',
   });
 
