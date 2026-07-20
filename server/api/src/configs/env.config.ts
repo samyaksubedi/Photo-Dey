@@ -15,7 +15,7 @@ const envSchema = z.object({
   SERVER_URL: z.string().min(1),
   // AI_URL: z.string().min(1),
   ACCESS_TOKEN_SECRET: z.string().min(1),
-  // WEBHOOK_SECRET: z.string().min(1),
+  WEBHOOK_SECRET: z.string().min(1),
   REDIS_URL: z.string().min(1),
   DATABASE_URL: z.string().min(1),
   NODE_ENV: z.enum(['development', 'production']),

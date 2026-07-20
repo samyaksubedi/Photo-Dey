@@ -87,6 +87,17 @@ const updateEvent = async (
     },
   });
 };
+const updateEventInternal = async (
+  id: string,
+  data: Prisma.EventUpdateInput,
+) => {
+  return prisma.event.update({
+    where: {
+      id,
+    },
+    data,
+  });
+};
 const getStatus = async (id: string) => {
   return await prisma.event.findFirst({
     where: {
@@ -110,5 +121,6 @@ export const eventRepository = {
   findByIdAndUserId,
   deleteById,
   updateEvent,
+  updateEventInternal,
   getStatus,
 };

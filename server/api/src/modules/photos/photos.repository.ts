@@ -48,6 +48,20 @@ const findByIdAndUserId = async (id: string, userId: string) => {
     },
   });
 };
+const findById = async (id: string) => {
+  return await prisma.photo.findFirst({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      eventId: true,
+      secureUrl: true,
+      publicId: true,
+      status: true,
+    },
+  });
+};
 
 const updatePhoto = async (id: string, data: Prisma.PhotoUpdateInput) => {
   await prisma.photo.update({
@@ -70,6 +84,7 @@ const getStatus = async (id: string) => {};
 export const photoRepository = {
   createPhoto,
   getPhotosByEventIdAndUserId,
+  findById,
   findByIdAndUserId,
   deleteById,
   updatePhoto,
