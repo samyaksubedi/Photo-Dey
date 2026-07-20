@@ -104,6 +104,7 @@ const signIn = async (data: SignInServiceInput) => {
     email: user.email,
     id: user.id,
     sessionId: userSession.id,
+    role: user.role,
   });
 
   return {
@@ -148,6 +149,7 @@ const refresh = async (data: { refreshToken: string }) => {
     email: user.email,
     id: user.id,
     sessionId: userSession.id,
+    role: user.role,
   });
 
   return accessToken;

@@ -39,6 +39,7 @@ const findByEmail = async (email: string) => {
       email: true,
       isVerified: true,
       passwordHash: true,
+      role: true,
     },
   });
 };
@@ -53,6 +54,7 @@ const findById = async (id: string) => {
       email: true,
       isVerified: true,
       name: true,
+      role: true,
     },
   });
 };
@@ -89,6 +91,44 @@ const updateUser = async (id: string, data: Prisma.UserUpdateInput) => {
   });
 };
 
+// No pagination for now : )
+const getUsers = async () => {
+  return await prisma.user.findMany({
+    where: {
+      role: 'user',
+    },
+
+    orderBy: {
+      createdAt: 'desc',
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      isVerified: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+};
+const getAdmins = async () => {
+  return await prisma.user.findMany({
+    where: {
+      role: 'admin',
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      isVerified: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+};
 export const userRepository = {
   createUser,
   findByEmail,
@@ -97,6 +137,8 @@ export const userRepository = {
   findByPasswordResetToken,
   updateUser,
   findById,
+  getUsers,
+  getAdmins,
 };
 
 // userRepository.findByEmail(email)

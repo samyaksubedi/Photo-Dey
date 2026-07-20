@@ -6,6 +6,7 @@ import { router as authRouter } from './modules/auth/auth.router.js';
 import { router as eventsRouter } from './modules/events/events.router.js';
 import { router as photosRouter } from './modules/photos/photos.router.js';
 import { router as webhooksRouter } from './modules/webhooks/webhooks.router.js';
+import { router as adminRouter } from './modules/admin/admin.router.js';
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/events', eventsRouter);
 app.use('/api/v1/photos', photosRouter);
 app.use('/api/v1/webhooks', webhooksRouter);
+app.use('/api/v1/admin', adminRouter);
 app.use(errorMiddleware); // Global Error Middleware - Should always be in the end of the middleware
 
 export { app };

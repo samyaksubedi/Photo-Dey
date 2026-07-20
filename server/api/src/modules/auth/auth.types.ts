@@ -6,6 +6,8 @@
 //   emailVerificationTokenExpires: Date;
 // };
 
+import type { UserRoles } from '../../generated/prisma/enums.js';
+
 export type UpdateEmailVerificationTokenAndExpiryInput = {
   email: string;
   emailVerificationToken: string;
@@ -31,4 +33,5 @@ export type AccessTokenPayload = {
   id: string;
   email: string;
   sessionId: string;
+  role: UserRoles;
 };
