@@ -48,6 +48,7 @@ const authenticateUser: RequestHandler = async (req, res, next) => {
       id: decoded.id,
       email: decoded.email,
       sessionId: decoded.sessionId,
+      role: decoded.role,
     };
 
     next();

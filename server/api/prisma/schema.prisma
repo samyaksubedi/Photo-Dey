@@ -99,7 +99,7 @@ model SearchRequest {
   id                 String              @id @default(uuid())
   eventId            String
   event              Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  chatId             String // Telegram chatId to send message back once searching is completed is ready : ) 
+  chatId             String              @unique // Telegram chatId 
   selfieUrl          String
   status             SearchRequestStatus @default(PENDING)
   matchedPhotosCount Int                 @default(0)

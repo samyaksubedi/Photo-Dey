@@ -2,15 +2,15 @@ import type { RequestHandler } from 'express';
 import { envVariables } from '../configs/env.config.js';
 import { ApiError } from '../utils/api-output.util.js';
 
-const authenticateWebhook: RequestHandler = async (req, res, next) => {
+const authenticateAiWebhook: RequestHandler = async (req, res, next) => {
   try {
-    const webhookSecret = req.headers['x-webhook-secret'];
+    const aiWebhookSecret = req.headers['x-webhook-secret'];
 
-    if (!webhookSecret || typeof webhookSecret !== 'string') {
+    if (!aiWebhookSecret || typeof aiWebhookSecret !== 'string') {
       throw new ApiError(401, 'Webhook secret missing');
     }
 
-    if (webhookSecret !== envVariables.WEBHOOK_SECRET) {
+    if (aiWebhookSecret !== envVariables.AI_WEBHOOK_SECRET) {
       throw new ApiError(401, 'Invalid webhook secret');
     }
 
@@ -20,4 +20,4 @@ const authenticateWebhook: RequestHandler = async (req, res, next) => {
   }
 };
 
-export { authenticateWebhook };
+export { authenticateAiWebhook };

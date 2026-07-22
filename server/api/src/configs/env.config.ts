@@ -15,13 +15,15 @@ const envSchema = z.object({
   SERVER_URL: z.string().min(1),
   // AI_URL: z.string().min(1),
   ACCESS_TOKEN_SECRET: z.string().min(1),
-  WEBHOOK_SECRET: z.string().min(1),
+  AI_WEBHOOK_SECRET: z.string().min(1),
   REDIS_URL: z.string().min(1),
   DATABASE_URL: z.string().min(1),
   NODE_ENV: z.enum(['development', 'production']),
   CLOUDINARY_CLOUD_NAME: z.string().min(1),
   CLOUDINARY_API_KEY: z.string().min(1),
   CLOUDINARY_API_SECRET: z.string().min(1),
+  TELEGRAM_WEBHOOK_SECRET: z.string().min(1),
+  TELEGRAM_BOT_TOKEN: z.string().min(1),
 });
 
 export const envVariables = envSchema.parse(process.env);

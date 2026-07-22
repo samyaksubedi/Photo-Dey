@@ -2,7 +2,7 @@ import express from 'express';
 import { validate } from '../../middlewares/validate.middleware.js';
 import { updateEvent, updatePhoto } from './webhooks.controller.js';
 import { updateEventSchema, updatePhotoSchema } from './webhooks.schema.js';
-import { authenticateWebhook } from '../../middlewares/webhook.middleware.js';
+import { authenticateAiWebhook } from '../../middlewares/ai.webhook.middleware.js';
 export const router = express.Router();
 
 //  update photo  : stats
@@ -10,13 +10,13 @@ export const router = express.Router();
 
 router.post(
   '/events',
-  authenticateWebhook,
+  authenticateAiWebhook,
   validate({ schema: updateEventSchema }),
   updateEvent,
 ); // Update event stats / status
 router.post(
   '/photos',
-  authenticateWebhook,
+  authenticateAiWebhook,
   validate({ schema: updatePhotoSchema }),
   updatePhoto,
 ); // update photo status
