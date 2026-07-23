@@ -3,7 +3,7 @@ import type { ProcessUploadQueueInput } from './upload.worker.js';
 
 export const enqueueUpload = async (data: ProcessUploadQueueInput) => {
   await uploadQueue.add(
-    data.type,
+    data.jobType,
     { ...data },
     {
       attempts: 2,
