@@ -32,7 +32,7 @@ const createEvent = async (data: CreateEventInput) => {
       userId: data.userId,
       filePath: photo.path,
       photoId: newPhoto.id,
-      type: 'image',
+      jobType: 'event-photo',
     });
   }
   await eventRepository.updateEvent(event.id, data.userId, {

@@ -5,18 +5,19 @@ import { logger } from '../../configs/logger.config.js';
 import { ApiError } from '../../utils/api-output.util.js';
 
 const CLOUDINARY_FOLDERS = {
-  image: 'PhotoDey/image',
+  'event-photo': 'PhotoDey/image',
+  'telegram-selfie': 'PhotoDey/image',
 };
 
 type UploadSourceFileInput = {
   filePath: string;
-  type: 'image';
+  jobType: 'event-photo' | 'telegram-selfie';
 };
 export const uploadSourceFile = async (data: UploadSourceFileInput) => {
-  const folder = CLOUDINARY_FOLDERS[data.type];
+  const folder = CLOUDINARY_FOLDERS[data.jobType];
 
   if (!folder) {
-    throw new ApiError(400, `Unsupported source type: ${data.type}`);
+    throw new ApiError(400, `Unsupported source type: ${data.jobType}`);
   }
 
   const uploadResult = await cloudinary.uploader.upload(data.filePath, {
