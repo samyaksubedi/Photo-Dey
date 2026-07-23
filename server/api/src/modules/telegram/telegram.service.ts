@@ -1,7 +1,9 @@
+import { saveStreamToFile } from '../../utils/file.util.js';
 import { eventRepository } from '../events/events.repository.js';
+import { searchRequestRepository } from '../search-request/search_req.repository.js';
 import { telegramSessionRepository } from './telegram-session.repository.js';
-import { sendMessage } from './telegram.api.js';
-
+import { downloadFile, getFile, sendMessage } from './telegram.api.js';
+import type { PhotoSize } from 'typegram';
 const handleStart = async (data: { chatId: string; eventId?: string }) => {
   if (!data.eventId) {
     return sendMessage({
@@ -47,7 +49,7 @@ Please contact to your event manager.`,
     chatId: data.chatId,
     text: `🎉 Welcome to PhotoDey!
 
-Your event has been connected successfully.
+${event.name} has been connected successfully.
 
 Now send me a selfie and I'll find your photos from this event.`,
   });
@@ -68,7 +70,7 @@ To find photos:
   });
 };
 const handleArchive = async (data: { chatId: string }) => {
-  // Later you'll fetch galleries from DB
+  // TODO
 
   return sendMessage({
     chatId: data.chatId,
@@ -79,11 +81,42 @@ Your previous galleries will appear here.
 (No galleries found yet.)`,
   });
 };
-const handleSelfieUpload = async (data: { chatId: string; photo: object }) => {
-  sendMessage({
+const handleSelfieUpload = async (data: {
+  chatId: string;
+  photo: PhotoSize[];
+}) => {
+  const telegramSession = await telegramSessionRepository.findByChatId(
+    data.chatId,
+  );
+  if (!telegramSession) {
+    return;
+  }
+  const event = await eventRepository.findById(telegramSession.eventId);
+  if (!event) {
+    return sendMessage({
+      chatId: data.chatId,
+      text: 'This event no longer exists.',
+    });
+  }
+  const largestPhoto = data.photo?.at(-1)!;
+  const file_id = largestPhoto?.file_id;
+  const file = await getFile(file_id);
+  const stream = await downloadFile(file.file_path);
+  const localPath = await saveStreamToFile(stream);
+  await searchRequestRepository.createSearchRequest({
     chatId: data.chatId,
-    // text: 'Thanks for the selfie wait for a minute ',
-    text: JSON.stringify(data.photo),
+    eventId: telegramSession.eventId,
+    localPath: localPath,
+  });
+  //TODO  Push to  upload queue with local_path
+
+  return sendMessage({
+    chatId: data.chatId,
+    text: `📸 Selfie received!
+
+We're processing your photos from ${event.name}.
+
+You'll receive a gallery link here as soon as it's ready.`,
   });
 };
 const handleUnknownCommand = async (data: { chatId: string }) => {

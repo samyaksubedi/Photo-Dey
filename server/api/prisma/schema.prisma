@@ -101,7 +101,8 @@ model SearchRequest {
   eventId            String
   event              Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
   chatId             String              @unique // Telegram chatId 
-  selfieUrl          String
+  localPath          String
+  selfieUrl          String?
   status             SearchRequestStatus @default(PENDING)
   matchedPhotosCount Int                 @default(0)
   matches            GuestPhotoMatch[]
@@ -153,7 +154,7 @@ model UserSession {
 }
 
 model TelegramSession {
-  chatId    String      @id
+  chatId    String   @id
   eventId   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
