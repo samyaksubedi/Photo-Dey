@@ -44,6 +44,7 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.1",
+    "typegram": "^5.2.0",
     "ua-parser-js": "^2.0.10",
     "winston": "^3.19.0",
     "zod": "^4.4.3"

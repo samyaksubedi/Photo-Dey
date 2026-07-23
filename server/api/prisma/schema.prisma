@@ -50,20 +50,21 @@ enum EventStatus {
 }
 
 model Event {
-  id               String          @id @default(uuid())
+  id               String            @id @default(uuid())
   name             String
-  totalPhotos      Int             @default(0)
-  uploadedPhotos   Int             @default(0)
-  processingPhotos Int             @default(0)
-  completedPhotos  Int             @default(0)
-  failedPhotos     Int             @default(0)
-  status           EventStatus     @default(CREATED)
-  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalPhotos      Int               @default(0)
+  uploadedPhotos   Int               @default(0)
+  processingPhotos Int               @default(0)
+  completedPhotos  Int               @default(0)
+  failedPhotos     Int               @default(0)
+  status           EventStatus       @default(CREATED)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           String
   searchRequests   SearchRequest[]
   photos           Photo[]
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  telegramSessions TelegramSession[]
 }
 
 enum PhotoStatus {
@@ -149,4 +150,13 @@ model UserSession {
   // timeStamps
   createdAt           DateTime @default(now())
   lastUsedAt          DateTime @updatedAt // Updates every time when user gets a new accessToken 
+}
+
+model TelegramSession {
+  chatId    String      @id
+  eventId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
