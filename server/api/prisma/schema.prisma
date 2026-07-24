@@ -100,7 +100,7 @@ model SearchRequest {
   id                 String              @id @default(uuid())
   eventId            String
   event              Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  chatId             String              @unique // Telegram chatId 
+  chatId             String
   localPath          String
   selfieUrl          String?
   status             SearchRequestStatus @default(PENDING)

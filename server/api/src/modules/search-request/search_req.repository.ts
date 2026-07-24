@@ -11,4 +11,24 @@ const createSearchRequest = async (
   });
 };
 
-export const searchRequestRepository = { createSearchRequest };
+const updateSearchRequest = async (
+  id: string,
+  data: Prisma.SearchRequestUncheckedUpdateInput,
+) => {
+  return await prisma.searchRequest.update({
+    where: { id },
+    data: {
+      ...data,
+    },
+  });
+};
+
+const findById = async (id: string) => {
+  return await prisma.searchRequest.findFirst({ where: { id } });
+};
+
+export const searchRequestRepository = {
+  createSearchRequest,
+  updateSearchRequest,
+  findById,
+};

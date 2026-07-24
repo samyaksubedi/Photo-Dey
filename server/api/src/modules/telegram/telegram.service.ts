@@ -1,3 +1,4 @@
+import { enqueueUpload } from '../../jobs/upload/upload.producer.js';
 import { saveStreamToFile } from '../../utils/file.util.js';
 import { eventRepository } from '../events/events.repository.js';
 import { searchRequestRepository } from '../search-request/search_req.repository.js';
@@ -103,24 +104,26 @@ const handleSelfieUpload = async (data: {
   const file = await getFile(file_id);
   const stream = await downloadFile(file.file_path);
   const localPath = await saveStreamToFile(stream);
-  await searchRequestRepository.createSearchRequest({
+  const searchRequest = await searchRequestRepository.createSearchRequest({
     chatId: data.chatId,
     eventId: telegramSession.eventId,
     localPath: localPath,
   });
-  //TODO  Push to  upload queue with local_path
-
-  return sendMessage({
-    chatId: data.chatId,
-    text: `📸 Selfie received!
-
-We're processing your photos from ${event.name}.
-
-You'll receive a gallery link here as soon as it's ready.`,
+  // {
+  //   jobType: 'telegram-selfie';
+  //   eventId: string;
+  //   searchRequestId: string;
+  //   filePath: string;
+  // }
+  enqueueUpload({
+    jobType: 'telegram-selfie',
+    eventId: event.id,
+    searchRequestId: searchRequest.id,
+    filePath: localPath,
   });
 };
 const handleUnknownCommand = async (data: { chatId: string }) => {
-  return sendMessage({
+  sendMessage({
     chatId: data.chatId,
     text: `❓ Unknown command.
 

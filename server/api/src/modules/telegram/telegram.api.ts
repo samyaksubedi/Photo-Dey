@@ -11,10 +11,7 @@ const telegramFileApi = axios.create({
   timeout: 10000,
 });
 
-export const sendMessage = async (data: {
-  chatId: string | number;
-  text: string;
-}) => {
+export const sendMessage = async (data: { chatId: string; text: string }) => {
   return telegramApi.post('/sendMessage', {
     chat_id: data.chatId,
     text: data.text,

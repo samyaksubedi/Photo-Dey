@@ -6,6 +6,9 @@ import { uploadSourceFile } from '../../modules/events/events.upload.js';
 import { eventRepository } from '../../modules/events/events.repository.js';
 import { photoRepository } from '../../modules/photos/photos.repository.js';
 import { enqueueAi } from '../ai/ai.producer.js';
+import { searchRequestRepository } from '../../modules/search-request/search_req.repository.js';
+import { enqueueSearch } from '../search/search.producer.js';
+import { sendMessage } from '../../modules/telegram/telegram.api.js';
 
 export type ProcessUploadQueueInput =
   | {
@@ -38,10 +41,10 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
         data.userId,
       );
       if (!event) {
-        return '';
+        return;
       }
       if (!photo) {
-        return '';
+        return;
       }
       const uploadedPhotos = event.uploadedPhotos;
       await eventRepository.updateEvent(data.eventId, data.userId, {
@@ -62,7 +65,35 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
     }
 
     case 'telegram-selfie': {
-      // TODO
+      const event = await eventRepository.findById(data.eventId);
+      if (!event) {
+        return;
+      }
+      const searchRequest = await searchRequestRepository.findById(
+        data.searchRequestId,
+      );
+
+      if (!searchRequest) {
+        return;
+      }
+      await searchRequestRepository.updateSearchRequest(data.searchRequestId, {
+        selfieUrl: secureUrl,
+        status: 'PROCESSING',
+      });
+      await enqueueSearch({
+        jobType: data.jobType,
+        eventId: data.eventId,
+        searchRequestId: data.searchRequestId,
+        selfieUrl: secureUrl,
+      });
+       sendMessage({
+        chatId: searchRequest.chatId,
+        text: `📸 Selfie received!
+
+We're processing your photos from ${event.name}.
+
+You'll receive a gallery link here as soon as it's ready.`,
+      });
       break;
     }
     default:
@@ -112,7 +143,20 @@ uploadWorker.on('failed', async (job, err) => {
       break;
     }
     case 'telegram-selfie': {
-      // TODO
+      const searchRequest = await searchRequestRepository.findById(
+        data.searchRequestId,
+      );
+      if (!searchRequest) {
+        return;
+      }
+      await searchRequestRepository.updateSearchRequest(data.searchRequestId, {
+        status: 'FAILED',
+      });
+      await sendMessage({
+        chatId: searchRequest.chatId,
+        text: `Sorry Internal Server Error.
+        Please try again later . `,
+      });
       break;
     }
   }
