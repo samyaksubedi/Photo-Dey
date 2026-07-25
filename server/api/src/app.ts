@@ -24,6 +24,7 @@ app.use('/api/v1/events', eventsRouter);
 app.use('/api/v1/photos', photosRouter);
 app.use('/api/v1/webhooks', webhooksRouter);
 // app.use('/api/v1/admin', adminRouter);
+// app.use('/api/v1/gallery', galleryRouter);
 app.use('/api/v1/telegram', telegramRouter);
 app.use(errorMiddleware); // Global Error Middleware - Should always be in the end of the middleware
 

@@ -86,7 +86,7 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
         searchRequestId: data.searchRequestId,
         selfieUrl: secureUrl,
       });
-       sendMessage({
+      await sendMessage({
         chatId: searchRequest.chatId,
         text: `📸 Selfie received!
 
@@ -112,23 +112,49 @@ uploadWorker.on('completed', async (job) => {
   logger.info('Photo uploaded successfully', { ...job.data });
 });
 uploadWorker.on('failed', async (job, err) => {
-  const data = job?.data;
-  if (!data) {
-    logger.error('Photo uploading failed ', {
+  if (!job) {
+    logger.error('Photo uploading failed', {
       message: err.message,
       stack: err.stack,
     });
-    return '';
+    return;
   }
+
+  const data = job.data;
+
+  // BullMQ retry info
+  const maxAttempts = job.opts.attempts ?? 1;
+  const isLastAttempt = job.attemptsMade >= maxAttempts;
+
+  // Log every failure
+  logger.error('Photo uploading failed', {
+    ...data,
+    attemptsMade: job.attemptsMade,
+    maxAttempts,
+    message: err.message,
+    stack: err.stack,
+  });
+
+  // Don't mark anything as failed until retries are exhausted
+  if (!isLastAttempt) {
+    return;
+  }
+
   switch (data.jobType) {
     case 'event-photo': {
       const event = await eventRepository.findById(data.eventId);
+
       if (!event) {
-        return '';
+        return;
       }
-      await photoRepository.updatePhoto(data.photoId, { status: 'FAILED' });
+
+      await photoRepository.updatePhoto(data.photoId, {
+        status: 'FAILED',
+      });
+
       const failedPhotos = event.failedPhotos;
       const totalPhotos = event.totalPhotos;
+
       if (failedPhotos === totalPhotos - 1) {
         await eventRepository.updateEvent(data.eventId, data.userId, {
           status: 'FAILED',
@@ -136,34 +162,43 @@ uploadWorker.on('failed', async (job, err) => {
         });
       } else {
         await eventRepository.updateEvent(data.eventId, data.userId, {
-          failedPhotos: failedPhotos + 1,
           status: 'PARTIAL_FAILURE',
+          failedPhotos: failedPhotos + 1,
         });
       }
+
       break;
     }
+
     case 'telegram-selfie': {
       const searchRequest = await searchRequestRepository.findById(
         data.searchRequestId,
       );
+
       if (!searchRequest) {
         return;
       }
+
       await searchRequestRepository.updateSearchRequest(data.searchRequestId, {
         status: 'FAILED',
       });
+
       await sendMessage({
         chatId: searchRequest.chatId,
-        text: `Sorry Internal Server Error.
-        Please try again later . `,
+        text: `❌ We couldn't process your selfie.
+
+This seems to be a temporary issue.
+
+Please upload your selfie again in a few minutes.
+
+If the problem continues, contact the event organizer.
+
+We apologize for the inconvenience.`,
       });
+
       break;
     }
   }
-  logger.error('Photo uploading failed ', {
-    ...job?.data,
-    message: err.message,
-    stack: err.stack,
-  });
+
   // TODO -> remove temp photo from disk
 });

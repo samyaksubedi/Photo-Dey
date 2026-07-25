@@ -1,3 +1,4 @@
+import { envVariables } from '../../configs/env.config.js';
 import { enqueueUpload } from '../../jobs/upload/upload.producer.js';
 import { saveStreamToFile } from '../../utils/file.util.js';
 import { eventRepository } from '../events/events.repository.js';
@@ -71,15 +72,43 @@ To find photos:
   });
 };
 const handleArchive = async (data: { chatId: string }) => {
-  // TODO
+  const completedSearchRequests =
+    await searchRequestRepository.findByChatIdAndStatus(
+      data.chatId,
+      'COMPLETED',
+    );
+
+  if (!completedSearchRequests.length) {
+    return sendMessage({
+      chatId: data.chatId,
+      text: `📂 Your Gallery Archive
+
+You don't have any completed galleries yet.`,
+    });
+  }
+
+  // For testing backend api
+  const GALLERY_LINK = `${envVariables.SERVER_URL}/api/v1/gallery`;
+
+  // Later after frontend is made we will use this
+  // const GALLERY_LINK = `${envVariables.CLIENT_URL}/gallery`;
+
+  const galleries = completedSearchRequests
+    .map(
+      (searchRequest, index) =>
+        `${index + 1}. ${GALLERY_LINK}/${searchRequest.id}`,
+    )
+    .join('\n\n');
 
   return sendMessage({
     chatId: data.chatId,
-    text: `📂 Archive
+    text: `📂 Your Gallery Archive
 
-Your previous galleries will appear here.
+Here are all your previous galleries.
 
-(No galleries found yet.)`,
+Tap any link below to open it.
+
+${galleries}`,
   });
 };
 const handleSelfieUpload = async (data: {

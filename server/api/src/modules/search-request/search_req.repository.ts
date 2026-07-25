@@ -1,5 +1,8 @@
 import { prisma } from '../../db/db.client.js';
-import type { Prisma } from '../../generated/prisma/client.js';
+import type {
+  Prisma,
+  SearchRequestStatus,
+} from '../../generated/prisma/client.js';
 
 const createSearchRequest = async (
   data: Prisma.SearchRequestUncheckedCreateInput,
@@ -27,8 +30,20 @@ const findById = async (id: string) => {
   return await prisma.searchRequest.findFirst({ where: { id } });
 };
 
+const findByChatId = async (chatId: string) => {
+  return await prisma.searchRequest.findMany({ where: { chatId } });
+};
+const findByChatIdAndStatus = async (
+  chatId: string,
+  status: SearchRequestStatus,
+) => {
+  return await prisma.searchRequest.findMany({ where: { chatId, status } });
+};
+
 export const searchRequestRepository = {
   createSearchRequest,
   updateSearchRequest,
   findById,
+  findByChatId,
+  findByChatIdAndStatus,
 };

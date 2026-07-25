@@ -1,7 +1,6 @@
 //  This is just a test worker , actual worker is written in Python !
 //  No any node worker ! --> The worker for this queue is in python . Worker is written in python using bullmq python support : )
 
-
 import { Worker, Job } from 'bullmq';
 import type { EnqueueAiInput } from './ai.producer.js';
 import { AI_QUEUE_KEY } from './ai.queue.js';
