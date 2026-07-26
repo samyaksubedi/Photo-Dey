@@ -43,5 +43,6 @@ const deletePhoto = async (data: { userId: string; photoId: string }) => {
     logger.error('PublicId not found while deleting photo', { ...photo });
   }
   await photoRepository.deleteById(data.photoId);
+  // TODO : This deletion should change the counts / analytics too like total photos , completed photos bla bla ...
 };
 export const photoServices = { getPhoto, getPhotos, deletePhoto };
