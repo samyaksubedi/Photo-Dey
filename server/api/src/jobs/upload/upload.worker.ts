@@ -78,7 +78,6 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
       }
       await searchRequestRepository.updateSearchRequest(data.searchRequestId, {
         selfieUrl: secureUrl,
-        status: 'PROCESSING',
       });
       await enqueueSearch({
         jobType: data.jobType,
@@ -86,14 +85,14 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
         searchRequestId: data.searchRequestId,
         selfieUrl: secureUrl,
       });
-      await sendMessage({
-        chatId: searchRequest.chatId,
-        text: `📸 Selfie received!
+//       await sendMessage({
+//         chatId: searchRequest.chatId,
+//         text: `📸 Selfie received!
 
-We're processing your photos from ${event.name}.
+// We're processing your photos from ${event.name}.
 
-You'll receive a gallery link here as soon as it's ready.`,
-      });
+// You'll receive a gallery link here as soon as it's ready.`,
+//       });
       break;
     }
     default:

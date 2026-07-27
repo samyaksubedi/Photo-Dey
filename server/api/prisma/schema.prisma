@@ -69,7 +69,6 @@ model Event {
 
 enum PhotoStatus {
   PENDING_UPLOAD
-  UPLOADING
   UPLOADED
   PROCESSING
   COMPLETED
@@ -133,7 +132,7 @@ model GuestPhotoMatch {
   photoId         String
 
   searchRequest SearchRequest @relation(fields: [searchRequestId], references: [id], onDelete: Cascade)
-  photo         Photo         @relation(fields: [photoId], references: [id])
+  photo         Photo         @relation(fields: [photoId], references: [id], onDelete: Cascade)
 
   confidence Float? // Similirity Score (0-1)
 

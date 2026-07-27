@@ -5,9 +5,10 @@ import { errorMiddleware } from './middlewares/error.middleware.js';
 import { router as authRouter } from './modules/auth/auth.router.js';
 import { router as eventsRouter } from './modules/events/events.router.js';
 import { router as photosRouter } from './modules/photos/photos.router.js';
-import { router as webhooksRouter } from './modules/webhooks/webhooks.router.js';
+import { router as aiRouter } from './modules/ai/ai.router.js';
 // import { router as adminRouter } from './modules/admin/admin.router.js';
 import { router as telegramRouter } from './modules/telegram/telegram.router.js';
+import { router as galleriesRouter } from './modules/galleries/galleries.router.js';
 
 const app = express();
 
@@ -22,9 +23,9 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/events', eventsRouter);
 app.use('/api/v1/photos', photosRouter);
-app.use('/api/v1/webhooks', webhooksRouter);
+app.use('/api/v1/ai', aiRouter);
 // app.use('/api/v1/admin', adminRouter);
-// app.use('/api/v1/gallery', galleryRouter);
+app.use('/api/v1/galleries', galleriesRouter);
 app.use('/api/v1/telegram', telegramRouter);
 app.use(errorMiddleware); // Global Error Middleware - Should always be in the end of the middleware
 

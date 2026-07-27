@@ -25,6 +25,7 @@ const fileFilter: multer.Options['fileFilter'] = (req, file, cb) => {
   ];
 
   if (!allowedMimeTypes.includes(file.mimetype)) {
+    
     return cb(
       new ApiError(400, 'Only JPG, JPEG, PNG, and WEBP images are allowed'),
     );
