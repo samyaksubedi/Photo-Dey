@@ -9,6 +9,7 @@ import { enqueueAi } from '../ai/ai.producer.js';
 import { searchRequestRepository } from '../../modules/search-request/search_req.repository.js';
 import { enqueueSearch } from '../search/search.producer.js';
 import { sendMessage } from '../../modules/telegram/telegram.api.js';
+import { deleteTempFile } from '../../utils/file.util.js';
 
 export type ProcessUploadQueueInput =
   | {
@@ -85,28 +86,34 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
         searchRequestId: data.searchRequestId,
         selfieUrl: secureUrl,
       });
-//       await sendMessage({
-//         chatId: searchRequest.chatId,
-//         text: `📸 Selfie received!
+      //       await sendMessage({
+      //         chatId: searchRequest.chatId,
+      //         text: `📸 Selfie received!
 
-// We're processing your photos from ${event.name}.
+      // We're processing your photos from ${event.name}.
 
-// You'll receive a gallery link here as soon as it's ready.`,
-//       });
+      // You'll receive a gallery link here as soon as it's ready.`,
+      //       });
       break;
     }
     default:
       break;
   }
 
-  // TODO -> remove temp photo from disk
 };
 const uploadWorker = new Worker(UPLOAD_QUEUE_KEY, processUploadQueue, {
   connection: redisConnection,
 });
 
 uploadWorker.on('completed', async (job) => {
-  const data = job.data;
+  try {
+    await deleteTempFile(job.data.filePath);
+  } catch (error) {
+    logger.error('Temporary photo cleanup failed', {
+      ...job.data,
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 
   logger.info('Photo uploaded successfully', { ...job.data });
 });
@@ -139,52 +146,56 @@ uploadWorker.on('failed', async (job, err) => {
     return;
   }
 
-  switch (data.jobType) {
-    case 'event-photo': {
-      const event = await eventRepository.findById(data.eventId);
+  try {
+    switch (data.jobType) {
+      case 'event-photo': {
+        const event = await eventRepository.findById(data.eventId);
 
-      if (!event) {
-        return;
-      }
+        if (!event) {
+          return;
+        }
 
-      await photoRepository.updatePhoto(data.photoId, {
-        status: 'FAILED',
-      });
-
-      const failedPhotos = event.failedPhotos;
-      const totalPhotos = event.totalPhotos;
-
-      if (failedPhotos === totalPhotos - 1) {
-        await eventRepository.updateEvent(data.eventId, data.userId, {
+        await photoRepository.updatePhoto(data.photoId, {
           status: 'FAILED',
-          failedPhotos: failedPhotos + 1,
         });
-      } else {
-        await eventRepository.updateEvent(data.eventId, data.userId, {
-          status: 'PARTIAL_FAILURE',
-          failedPhotos: failedPhotos + 1,
-        });
+
+        const failedPhotos = event.failedPhotos;
+        const totalPhotos = event.totalPhotos;
+
+        if (failedPhotos === totalPhotos - 1) {
+          await eventRepository.updateEvent(data.eventId, data.userId, {
+            status: 'FAILED',
+            failedPhotos: failedPhotos + 1,
+          });
+        } else {
+          await eventRepository.updateEvent(data.eventId, data.userId, {
+            status: 'PARTIAL_FAILURE',
+            failedPhotos: failedPhotos + 1,
+          });
+        }
+
+        break;
       }
 
-      break;
-    }
+      case 'telegram-selfie': {
+        const searchRequest = await searchRequestRepository.findById(
+          data.searchRequestId,
+        );
 
-    case 'telegram-selfie': {
-      const searchRequest = await searchRequestRepository.findById(
-        data.searchRequestId,
-      );
+        if (!searchRequest) {
+          return;
+        }
 
-      if (!searchRequest) {
-        return;
-      }
+        await searchRequestRepository.updateSearchRequest(
+          data.searchRequestId,
+          {
+            status: 'FAILED',
+          },
+        );
 
-      await searchRequestRepository.updateSearchRequest(data.searchRequestId, {
-        status: 'FAILED',
-      });
-
-      await sendMessage({
-        chatId: searchRequest.chatId,
-        text: `❌ We couldn't process your selfie.
+        await sendMessage({
+          chatId: searchRequest.chatId,
+          text: `❌ We couldn't process your selfie.
 
 This seems to be a temporary issue.
 
@@ -193,11 +204,22 @@ Please upload your selfie again in a few minutes.
 If the problem continues, contact the event organizer.
 
 We apologize for the inconvenience.`,
-      });
+        });
 
-      break;
+        break;
+      }
+    }
+  } finally {
+    try {
+      await deleteTempFile(data.filePath);
+    } catch (cleanupError) {
+      logger.error('Temporary photo cleanup failed', {
+        ...data,
+        message:
+          cleanupError instanceof Error
+            ? cleanupError.message
+            : String(cleanupError),
+      });
     }
   }
-
-  // TODO -> remove temp photo from disk
 });

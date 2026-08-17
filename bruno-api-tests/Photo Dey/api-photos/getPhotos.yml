@@ -1,0 +1,19 @@
+info:
+  name: getPhotos
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://localhost:3000/api/v1/photos/event/:eventId
+  params:
+    - name: eventId
+      value: 33ca4b92-498f-425f-ab28-88eb47c6c32d
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

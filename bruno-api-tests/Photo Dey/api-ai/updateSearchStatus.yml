@@ -1,0 +1,45 @@
+info:
+  name: updateSearchStatus
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://localhost:3000/api/v1/ai/search-status
+  headers:
+    - name: x-webhook-secret
+      value: fuckyou6969
+      description: Webhook Secret
+  body:
+    type: json
+    data: |-
+      {
+        "status": "COMPLETED",
+        "searchRequestId": "61233349-5fcd-47a3-9b6f-0ff933a57bd5",
+        "matchedPhotosMetadata": [
+          {
+            "photoId": "6d7a07fc-3588-40dc-89ca-97b841c65a37",
+            "confidence": 0.98
+          },
+           {
+            "photoId": "8df8e15e-10d4-4bf0-a65b-8527d82aa89c",
+            "confidence": 0.90
+          },
+           {
+            "photoId": "9ce1ed7c-0b91-436c-a7cb-e542c544fc1b",
+            "confidence": 0.87
+          },
+           {
+            "photoId": "6cd2b32f-8b5a-45d5-8b22-c6d549e58a39",
+            "confidence": 0.88
+          }
+       
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

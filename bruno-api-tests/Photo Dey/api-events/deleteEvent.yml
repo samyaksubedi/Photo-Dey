@@ -1,0 +1,19 @@
+info:
+  name: deleteEvent
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: http://localhost:3000/api/v1/events/:eventId
+  params:
+    - name: eventId
+      value: 448e16b8-fde3-463b-80c5-8be5e8559f27
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

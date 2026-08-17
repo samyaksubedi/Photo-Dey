@@ -1,0 +1,7 @@
+info:
+  name: api/events
+  type: folder
+  seq: 3
+
+request:
+  auth: inherit

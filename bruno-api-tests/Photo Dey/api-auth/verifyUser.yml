@@ -1,0 +1,15 @@
+info:
+  name: verifyUser
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: http://localhost:3000/api/v1/auth/verify/77adcc1964efa980484a360108f810a22dd98b5de76d712721e5b82de873d70c
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

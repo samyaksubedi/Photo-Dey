@@ -1,0 +1,19 @@
+info:
+  name: getPhoto
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: http://localhost:3000/api/v1/photos/:photoId
+  params:
+    - name: photoId
+      value: 8fd6cedd-f104-4a70-bdb9-f5176bc30f3d
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

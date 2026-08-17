@@ -55,3 +55,43 @@ export const deleteSourceFile = async (data: DeleteSourceFileInput) => {
     result: result.result,
   };
 };
+
+type DeleteSourceFilesInput = {
+  publicIds: string[];
+  type: 'image';
+};
+
+const CLOUDINARY_DELETE_BATCH_SIZE = 100;
+
+export const deleteSourceFiles = async (data: DeleteSourceFilesInput) => {
+  const publicIds = [...new Set(data.publicIds)];
+
+  for (
+    let index = 0;
+    index < publicIds.length;
+    index += CLOUDINARY_DELETE_BATCH_SIZE
+  ) {
+    const batch = publicIds.slice(index, index + CLOUDINARY_DELETE_BATCH_SIZE);
+    const result = await cloudinary.api.delete_resources(batch, {
+      resource_type: data.type,
+      type: 'upload',
+    });
+
+    const failedPublicIds = batch.filter((publicId) => {
+      const deletionStatus = result.deleted?.[publicId];
+      return deletionStatus !== 'deleted' && deletionStatus !== 'not_found';
+    });
+
+    if (failedPublicIds.length > 0) {
+      throw new ApiError(
+        500,
+        `Failed to delete ${failedPublicIds.length} Cloudinary asset(s)`,
+      );
+    }
+  }
+
+  return {
+    success: true,
+    deletedCount: publicIds.length,
+  };
+};

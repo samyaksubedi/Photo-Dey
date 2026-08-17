@@ -1,0 +1,5 @@
+name: auth
+variables:
+  - name: access_token
+    value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImViZDQyNGM5LTliZjUtNGI1Yi04YTc0LTI0ZTY4N2VkNmEzNCIsImVtYWlsIjoic2FtZXhlY29kZXNAZ21haWwuY29tIiwic2Vzc2lvbklkIjoiMWM2ZDA0OTctMmZlMS00NWJjLWJjYjYtYjZlMzI2NzZjMTY3Iiwicm9sZSI6InVzZXIiLCJpYXQiOjE3ODUxMzYyMzIsImV4cCI6MTc4NTEzNzEzMn0.XlwMY-7xZrEnmga3QdwRmjPvrcGHrCcrNlQQE9_F-8g
+    description: ""

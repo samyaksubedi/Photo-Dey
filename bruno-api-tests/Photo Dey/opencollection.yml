@@ -1,0 +1,35 @@
+opencollection: 1.0.0
+
+info:
+  name: Photo Dey
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  auth:
+    type: bearer
+    token: "{{access_token}}"
+  variables:
+    - name: auth_secret_0j6f
+      value: ""
+    - name: supabase_service_role_api_key_0qxw
+      value: ""
+    - name: json_web_token_0qxw
+      value: ""
+    - name: auth_secret_089a
+      value: ""
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git

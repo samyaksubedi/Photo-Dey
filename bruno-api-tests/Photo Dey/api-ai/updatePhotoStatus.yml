@@ -1,0 +1,22 @@
+info:
+  name: updatePhotoStatus
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/api/v1/ai/photo-status
+  headers:
+    - name: x-webhook-secret
+      value: fuckyou6969
+      description: Webhook Secret
+  body:
+    type: json
+    data: '{"status":"FAILED","photoId":"21f9c325-b671-48f5-8693-79dcbf17ac79"}'
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

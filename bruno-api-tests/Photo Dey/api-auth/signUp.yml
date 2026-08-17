@@ -1,0 +1,18 @@
+info:
+  name: signUp
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/api/v1/auth/signUp
+  body:
+    type: json
+    data: ' { "name":"Samyak Raj Subedi", "email":"samexecodes@gmail.com", "password":"CLEB1197B2" }'
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

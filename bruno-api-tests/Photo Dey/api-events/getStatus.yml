@@ -1,0 +1,19 @@
+info:
+  name: getStatus
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: http://localhost:3000/api/v1/events/:eventId/status
+  params:
+    - name: eventId
+      value: 448e16b8-fde3-463b-80c5-8be5e8559f27
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -2,6 +2,7 @@ import { enqueueUpload } from '../../jobs/upload/upload.producer.js';
 import { ApiError } from '../../utils/api-output.util.js';
 import { photoRepository } from '../photos/photos.repository.js';
 import { eventRepository } from './events.repository.js';
+import { deleteSourceFiles } from './events.upload.js';
 
 const getEvents = async (data: { userId: string }) => {
   //  Get all events  of the user
@@ -60,7 +61,16 @@ const deleteEvent = async (data: { eventId: string; userId: string }) => {
   if (!event) {
     throw new ApiError(404, 'Event not found');
   }
-  // TODO Delete all photo from cloudinary too
+
+  const photos = await photoRepository.getPhotosByEventIdAndUserId(
+    data.eventId,
+    data.userId,
+  );
+  const publicIds = photos
+    .map((photo) => photo.publicId)
+    .filter((publicId): publicId is string => Boolean(publicId));
+
+  await deleteSourceFiles({ publicIds, type: 'image' });
   await eventRepository.deleteById(data.eventId);
 };
 const getStatus = async (data: { eventId: string; userId: string }) => {
