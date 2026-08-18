@@ -5,6 +5,7 @@ import type {
   DeleteEventInput,
   GetEventInput,
   GetStatusInput,
+  UpdatePublicAccessBody,
 } from './events.schema.js';
 import { ApiError, ApiResponse } from '../../utils/api-output.util.js';
 
@@ -80,6 +81,30 @@ export const getStatus: RequestHandler = async (req, res, next) => {
     return res
       .status(200)
       .json(new ApiResponse(200, { status }, 'Status fetched successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updatePublicAccess: RequestHandler = async (req, res, next) => {
+  try {
+    const params = req.params as GetEventInput;
+    const body = req.body as UpdatePublicAccessBody;
+    const publicAccess = await eventServices.updatePublicAccess({
+      eventId: params.eventId,
+      userId: req.user.id,
+      publicEnabled: body.publicEnabled,
+    });
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { publicAccess },
+          'Event public access updated successfully',
+        ),
+      );
   } catch (error) {
     next(error);
   }

@@ -12,11 +12,11 @@ export const telegramWebhook: RequestHandler = async (req, res, next) => {
     const chatId = update.message?.chat?.id.toString();
     const text = update.message?.text;
     if (text?.startsWith('/start')) {
-      const eventId = text.split(' ')[1];
+      const publicCode = text.trim().split(/\s+/)[1];
 
       await telegramService.handleStart({
         chatId,
-        eventId,
+        publicCode,
       });
 
       return res.sendStatus(200);

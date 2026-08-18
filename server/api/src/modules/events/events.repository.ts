@@ -8,6 +8,8 @@ const createEvent = async (data: Prisma.EventUncheckedCreateInput) => {
     },
     select: {
       id: true,
+      publicCode: true,
+      publicEnabled: true,
       name: true,
       totalPhotos: true,
       uploadedPhotos: true,
@@ -26,6 +28,8 @@ const getEvents = async (userId: string) => {
     },
     select: {
       id: true,
+      publicCode: true,
+      publicEnabled: true,
       name: true,
       totalPhotos: true,
       uploadedPhotos: true,
@@ -43,6 +47,8 @@ const findById = async (id: string) => {
     },
     select: {
       id: true,
+      publicCode: true,
+      publicEnabled: true,
       userId: true,
       name: true,
       totalPhotos: true,
@@ -53,6 +59,21 @@ const findById = async (id: string) => {
       processingPhotos: true,
       createdAt: true,
       updatedAt: true,
+    },
+  });
+};
+const findByPublicCode = async (publicCode: string) => {
+  return prisma.event.findUnique({
+    where: {
+      publicCode,
+    },
+    select: {
+      id: true,
+      publicCode: true,
+      publicEnabled: true,
+      name: true,
+      status: true,
+      completedPhotos: true,
     },
   });
 };
@@ -118,6 +139,7 @@ export const eventRepository = {
   createEvent,
   getEvents,
   findById,
+  findByPublicCode,
   findByIdAndUserId,
   deleteById,
   updateEvent,

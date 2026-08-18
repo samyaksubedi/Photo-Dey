@@ -7,6 +7,7 @@ import {
   getEvent,
   getEvents,
   getStatus,
+  updatePublicAccess,
 } from './events.controller.js';
 import { upload } from '../../middlewares/upload.middleware.js';
 import {
@@ -14,6 +15,7 @@ import {
   deleteEventSchema,
   getEventSchema,
   getStatusSchema,
+  updatePublicAccessSchema,
 } from './events.schema.js';
 
 
@@ -26,6 +28,13 @@ router.post(
   upload.array('photos', 1000),
   validate({ schema: createEventSchema }),
   createEvent,
+);
+router.patch(
+  '/:eventId/public-access',
+  authenticateUser,
+  validate({ schema: getEventSchema, source: 'params' }),
+  validate({ schema: updatePublicAccessSchema }),
+  updatePublicAccess,
 );
 router.get(
   '/:eventId',

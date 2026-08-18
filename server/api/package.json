@@ -9,7 +9,8 @@
     "worker:upload": "tsx src/jobs/upload/upload.worker.ts",
     "worker:ai": "tsx src/jobs/ai/ai.worker.ts",
     "worker:search": "tsx src/jobs/search/search.worker.ts",
-    "build": "npx tsc",
+    "test": "npm run build && node --test tests/public-event.test.mjs",
+    "build": "tsc",
     "start": "node dist/server.js"
   },
   "keywords": [],

@@ -2,12 +2,13 @@ import { envVariables } from '../../configs/env.config.js';
 import { enqueueUpload } from '../../jobs/upload/upload.producer.js';
 import { saveStreamToFile } from '../../utils/file.util.js';
 import { eventRepository } from '../events/events.repository.js';
+import { isEventPubliclySearchable } from '../events/event-public.util.js';
 import { searchRequestRepository } from '../search-request/search_req.repository.js';
 import { telegramSessionRepository } from './telegram-session.repository.js';
 import { downloadFile, getFile, sendMessage } from './telegram.api.js';
 import type { PhotoSize } from 'typegram';
-const handleStart = async (data: { chatId: string; eventId?: string }) => {
-  if (!data.eventId) {
+const handleStart = async (data: { chatId: string; publicCode?: string }) => {
+  if (!data.publicCode) {
     return sendMessage({
       chatId: data.chatId,
       text: `📸 Welcome to PhotoDey!
@@ -19,7 +20,7 @@ Commands:
 /archive - View your previous galleries`,
     });
   }
-  const event = await eventRepository.findById(data.eventId);
+  const event = await eventRepository.findByPublicCode(data.publicCode);
   if (!event) {
     return sendMessage({
       chatId: data.chatId,
@@ -30,6 +31,28 @@ Sorry your event can't be found.
 Please contact to your event manager.`,
     });
   }
+  if (!event.publicEnabled) {
+    return sendMessage({
+      chatId: data.chatId,
+      text: `This event is no longer accepting photo searches.
+
+Please contact the event organizer.`,
+    });
+  }
+  if (!isEventPubliclySearchable(event)) {
+    const isProcessing =
+      event.status === 'CREATED' || event.status === 'PROCESSING';
+    return sendMessage({
+      chatId: data.chatId,
+      text: isProcessing
+        ? `The photos for ${event.name} are still being prepared.
+
+Please try again shortly.`
+        : `Photo search is unavailable for ${event.name}.
+
+Please contact the event organizer.`,
+    });
+  }
   const telegramSession = await telegramSessionRepository.findByChatId(
     data.chatId,
   );
@@ -37,13 +60,13 @@ Please contact to your event manager.`,
   if (!telegramSession) {
     await telegramSessionRepository.createTelegramSession({
       chatId: data.chatId,
-      eventId: data.eventId,
+      eventId: event.id,
     });
   }
   // Else update the eventId so user can search photo for any other event !
   else {
     await telegramSessionRepository.updateTelegramSession(data.chatId, {
-      eventId: data.eventId,
+      eventId: event.id,
     });
   }
 
@@ -126,6 +149,26 @@ const handleSelfieUpload = async (data: {
     return sendMessage({
       chatId: data.chatId,
       text: 'This event no longer exists.',
+    });
+  }
+  if (!event.publicEnabled) {
+    return sendMessage({
+      chatId: data.chatId,
+      text: `This event is no longer accepting photo searches.
+
+Please contact the event organizer.`,
+    });
+  }
+  if (!isEventPubliclySearchable(event)) {
+    const isProcessing =
+      event.status === 'CREATED' || event.status === 'PROCESSING';
+    return sendMessage({
+      chatId: data.chatId,
+      text: isProcessing
+        ? `The event photos are still being prepared.
+
+Please try again shortly.`
+        : 'Photo search is unavailable for this event.',
     });
   }
   const largestPhoto = data.photo?.at(-1)!;

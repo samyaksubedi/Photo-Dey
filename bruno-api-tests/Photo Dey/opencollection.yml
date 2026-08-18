@@ -17,7 +17,7 @@ config:
 request:
   auth:
     type: bearer
-    token: "{{access_token}}"
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImExM2RmZTVmLTNlNTctNDVjZS1iYzU0LTZkZGI1MDIyNWI2OCIsImVtYWlsIjoic2FtZXhlY29kZXNAZ21haWwuY29tIiwic2Vzc2lvbklkIjoiZjE5NTQ0MmItMmQ5Zi00ZTIxLThmNDAtZWY2ZjNhZjcxMTg1Iiwicm9sZSI6InVzZXIiLCJpYXQiOjE3ODcwNjg4ODIsImV4cCI6MTc4NzA2OTc4Mn0.ON-pMPoK5Z0aLQmYBes-QjpNqz_HcX_HWVPuLb_9u5E
   variables:
     - name: auth_secret_0j6f
       value: ""

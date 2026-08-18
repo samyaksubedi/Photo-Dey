@@ -4,6 +4,7 @@ import { photoRepository } from '../photos/photos.repository.js';
 import { eventRepository } from './events.repository.js';
 import { deleteSourceFiles } from './events.upload.js';
 import { enqueueAiCleanup } from '../../jobs/ai-cleanup/ai-cleanup.producer.js';
+import { generatePublicCode } from './event-public.util.js';
 
 const getEvents = async (data: { userId: string }) => {
   //  Get all events  of the user
@@ -22,6 +23,7 @@ const createEvent = async (data: CreateEventInput) => {
     name: data.name,
     userId: data.userId,
     totalPhotos: data.photos.length,
+    publicCode: generatePublicCode(),
   });
   const photos = data.photos;
   for (const photo of photos) {
@@ -87,10 +89,33 @@ const getStatus = async (data: { eventId: string; userId: string }) => {
   const status = await eventRepository.getStatus(data.eventId);
   return status;
 };
+const updatePublicAccess = async (data: {
+  eventId: string;
+  userId: string;
+  publicEnabled: boolean;
+}) => {
+  const event = await eventRepository.findByIdAndUserId(
+    data.eventId,
+    data.userId,
+  );
+  if (!event) {
+    throw new ApiError(404, 'Event not found');
+  }
+
+  await eventRepository.updateEvent(data.eventId, data.userId, {
+    publicEnabled: data.publicEnabled,
+  });
+
+  return {
+    publicCode: event.publicCode,
+    publicEnabled: data.publicEnabled,
+  };
+};
 export const eventServices = {
   getEvents,
   createEvent,
   getEvent,
   deleteEvent,
   getStatus,
+  updatePublicAccess,
 };

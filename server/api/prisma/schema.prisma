@@ -51,6 +51,8 @@ enum EventStatus {
 
 model Event {
   id               String            @id @default(uuid())
+  publicCode       String            @unique
+  publicEnabled    Boolean           @default(true)
   name             String
   totalPhotos      Int               @default(0)
   uploadedPhotos   Int               @default(0)

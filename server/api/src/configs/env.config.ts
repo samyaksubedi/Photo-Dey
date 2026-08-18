@@ -24,6 +24,11 @@ const envSchema = z.object({
   CLOUDINARY_API_SECRET: z.string().min(1),
   TELEGRAM_WEBHOOK_SECRET: z.string().min(1),
   TELEGRAM_BOT_TOKEN: z.string().min(1),
+  TELEGRAM_BOT_USERNAME: z
+    .string()
+    .trim()
+    .regex(/^@?[A-Za-z0-9_]{5,32}$/)
+    .optional(),
 });
 
 export const envVariables = envSchema.parse(process.env);

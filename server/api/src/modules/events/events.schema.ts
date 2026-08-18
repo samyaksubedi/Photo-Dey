@@ -19,3 +19,10 @@ export const getStatusSchema = z.object({
   eventId: uuid(),
 });
 export type GetStatusInput = z.infer<typeof getStatusSchema>;
+
+export const updatePublicAccessSchema = z.object({
+  publicEnabled: z.boolean(),
+});
+export type UpdatePublicAccessBody = z.infer<
+  typeof updatePublicAccessSchema
+>;

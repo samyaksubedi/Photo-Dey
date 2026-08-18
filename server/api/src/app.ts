@@ -9,6 +9,7 @@ import { router as aiRouter } from './modules/ai/ai.router.js';
 // import { router as adminRouter } from './modules/admin/admin.router.js';
 import { router as telegramRouter } from './modules/telegram/telegram.router.js';
 import { router as galleriesRouter } from './modules/galleries/galleries.router.js';
+import { router as publicEventsRouter } from './modules/public-events/public-events.router.js';
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use('/api/v1/ai', aiRouter);
 // app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/galleries', galleriesRouter);
 app.use('/api/v1/telegram', telegramRouter);
+app.use('/api/v1/public/events', publicEventsRouter);
 app.use(errorMiddleware); // Global Error Middleware - Should always be in the end of the middleware
 
 export { app };
