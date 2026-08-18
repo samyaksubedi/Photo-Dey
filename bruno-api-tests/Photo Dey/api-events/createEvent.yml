@@ -15,23 +15,25 @@ http:
       - name: photos
         type: file
         value:
-          - C:\Users\Acer\OneDrive\Pictures\Screenshots\Screenshot 2026-06-22 022724.png
-          - C:\Users\Acer\OneDrive\Pictures\Screenshots\Screenshot 2026-06-25 155050.png
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\CSC_0084.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\CSC_0085.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0001.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0002.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0003.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0007.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0008.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0009.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0010.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0011.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0016.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0020.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0021.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0022.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0023.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0059.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0060.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0061.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0062.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0063.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0064.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0065.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0066.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0067.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0068.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0070.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0074.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0075.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0076.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0078.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0079.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0080.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0081.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0082.JPG
   auth: inherit
 
 settings:

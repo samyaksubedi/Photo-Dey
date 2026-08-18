@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:3000/api/v1/auth/verify/77adcc1964efa980484a360108f810a22dd98b5de76d712721e5b82de873d70c
+  url: http://localhost:3000/api/v1/auth/verify/803b111648ac164e30bc7b0c949d193e5ba715bb95b284896ea9415c2e9195cd
   auth: inherit
 
 settings:
