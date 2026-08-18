@@ -10,12 +10,18 @@ import { router as aiRouter } from './modules/ai/ai.router.js';
 import { router as telegramRouter } from './modules/telegram/telegram.router.js';
 import { router as galleriesRouter } from './modules/galleries/galleries.router.js';
 import { router as publicEventsRouter } from './modules/public-events/public-events.router.js';
+import { envVariables } from './configs/env.config.js';
 
 const app = express();
 
+app.use(
+  cors({
+    origin: envVariables.CLIENT_URL,
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
 app.set('trust proxy', true); // Get Real IP Address when using  Nginx
 app.get('/', (req, res) => {
   res.send({ status: 'Healthy' });

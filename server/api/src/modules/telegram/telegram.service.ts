@@ -107,11 +107,7 @@ You don't have any completed galleries yet.`,
     });
   }
 
-  // For testing backend api
-  const GALLERY_LINK = `${envVariables.SERVER_URL}/api/v1/galleries`;
-
-  // Later after frontend is made we will use this
-  // const GALLERY_LINK = `${envVariables.CLIENT_URL}/gallery`;
+  const GALLERY_LINK = `${envVariables.CLIENT_URL}/gallery`;
 
   const galleries = completedSearchRequests
     .map(

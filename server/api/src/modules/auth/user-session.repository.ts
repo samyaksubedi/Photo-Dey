@@ -31,6 +31,7 @@ const getAllUserSessionInfo = async (userId: string) => {
       userId,
     },
     select: {
+      id: true,
       deviceInfo: true,
       ipAddress: true,
       createdAt: true,

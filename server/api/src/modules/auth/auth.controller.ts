@@ -133,12 +133,16 @@ export const getAllLoggedInDeviceInfo: RequestHandler = async (
   try {
     const userId = req.user.id;
     const sessionInfo = await authService.getAllLoggedInDeviceInfo({ userId });
+    const sessions = sessionInfo.map((session) => ({
+      ...session,
+      isCurrent: session.id === req.user.sessionId,
+    }));
     return res
       .status(200)
       .json(
         new ApiResponse(
           200,
-          { ...sessionInfo },
+          { sessions },
           'Users sessions fetched successfully',
         ),
       );

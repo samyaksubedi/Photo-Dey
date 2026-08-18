@@ -186,11 +186,7 @@ We apologize for the inconvenience.`,
     return;
   }
 
-  // For testing backend api
-  const GALLERY_LINK = `${envVariables.SERVER_URL}/api/v1/galleries/${data.searchRequestId}`;
-
-  // Later after frontend is made we will use this
-  // const GALLERY_LINK = `${envVariables.CLIENT_URL}/gallery/${data.searchRequestId}`;
+  const GALLERY_LINK = `${envVariables.CLIENT_URL}/gallery/${data.searchRequestId}`;
 
   await sendMessage({
     chatId: searchRequest.chatId,
