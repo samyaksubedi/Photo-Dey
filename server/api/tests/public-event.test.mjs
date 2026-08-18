@@ -7,6 +7,10 @@ import {
   getPublicEventAvailability,
   isEventPubliclySearchable,
 } from '../dist/modules/events/event-public.util.js';
+import {
+  buildSearchCompletionMessage,
+  hasSearchMatches,
+} from '../dist/modules/ai/search-result.util.js';
 
 test('generates unique Telegram-safe public codes', () => {
   const codes = new Set(Array.from({ length: 100 }, generatePublicCode));
@@ -76,4 +80,25 @@ test('builds the Telegram start link from the public code', () => {
     buildTelegramDeepLink('@PhotoDeyBot', 'A7kP9xQ2'),
     'https://t.me/PhotoDeyBot?start=A7kP9xQ2',
   );
+});
+
+test('zero-result searches send guidance without a gallery link', () => {
+  const message = buildSearchCompletionMessage({ matchCount: 0 });
+
+  assert.equal(hasSearchMatches(0), false);
+  assert.match(message, /couldn't find any matching photos/);
+  assert.doesNotMatch(message, /https?:\/\//);
+  assert.doesNotMatch(message, /gallery is ready/i);
+});
+
+test('positive search results include the gallery link', () => {
+  const galleryLink = 'https://photodey.test/gallery/search-id';
+  const message = buildSearchCompletionMessage({
+    matchCount: 2,
+    galleryLink,
+  });
+
+  assert.equal(hasSearchMatches(2), true);
+  assert.match(message, /We found 2 matching photos/);
+  assert.match(message, new RegExp(galleryLink));
 });

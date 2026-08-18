@@ -39,6 +39,17 @@ const findByChatIdAndStatus = async (
 ) => {
   return await prisma.searchRequest.findMany({ where: { chatId, status } });
 };
+const findCompletedGalleriesByChatId = async (chatId: string) => {
+  return prisma.searchRequest.findMany({
+    where: {
+      chatId,
+      status: 'COMPLETED',
+      matchedPhotosCount: {
+        gt: 0,
+      },
+    },
+  });
+};
 
 export const searchRequestRepository = {
   createSearchRequest,
@@ -46,4 +57,5 @@ export const searchRequestRepository = {
   findById,
   findByChatId,
   findByChatIdAndStatus,
+  findCompletedGalleriesByChatId,
 };

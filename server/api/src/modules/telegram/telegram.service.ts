@@ -96,10 +96,7 @@ To find photos:
 };
 const handleArchive = async (data: { chatId: string }) => {
   const completedSearchRequests =
-    await searchRequestRepository.findByChatIdAndStatus(
-      data.chatId,
-      'COMPLETED',
-    );
+    await searchRequestRepository.findCompletedGalleriesByChatId(data.chatId);
 
   if (!completedSearchRequests.length) {
     return sendMessage({

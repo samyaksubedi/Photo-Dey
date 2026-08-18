@@ -9,6 +9,10 @@ import type {
   HandlePhotoStatusChangedInput,
   HandleSearchStatusChangedInput,
 } from './ai.schema.js';
+import {
+  buildSearchCompletionMessage,
+  hasSearchMatches,
+} from './search-result.util.js';
 
 const handlePhotoStatusChanged = async (
   data: HandlePhotoStatusChangedInput,
@@ -156,18 +160,31 @@ We apologize for the inconvenience.`,
   // COMPLETED
   // ===========================
 
-  await guestPhotoMatchRepository.createMany(
-    data.matchedPhotosMetadata.map((photo) => ({
-      searchRequestId: data.searchRequestId,
-      photoId: photo.photoId,
-      confidence: photo.confidence,
-    })),
-  );
+  const matchCount = data.matchedPhotosMetadata.length;
+
+  if (hasSearchMatches(matchCount)) {
+    await guestPhotoMatchRepository.createMany(
+      data.matchedPhotosMetadata.map((photo) => ({
+        searchRequestId: data.searchRequestId,
+        photoId: photo.photoId,
+        confidence: photo.confidence,
+      })),
+    );
+  }
 
   await searchRequestRepository.updateSearchRequest(data.searchRequestId, {
     status: 'COMPLETED',
-    matchedPhotosCount: data.matchedPhotosMetadata.length,
+    matchedPhotosCount: matchCount,
   });
+
+  if (!hasSearchMatches(matchCount)) {
+    await sendMessage({
+      chatId: searchRequest.chatId,
+      text: buildSearchCompletionMessage({ matchCount }),
+    });
+
+    return;
+  }
 
   // For testing backend api
   const GALLERY_LINK = `${envVariables.SERVER_URL}/api/v1/galleries/${data.searchRequestId}`;
@@ -177,11 +194,10 @@ We apologize for the inconvenience.`,
 
   await sendMessage({
     chatId: searchRequest.chatId,
-    text: `🎉 Your gallery is ready!
-
-We found ${data.matchedPhotosMetadata.length} matching photo${data.matchedPhotosMetadata.length === 1 ? '' : 's'}.
-
-📂 ${GALLERY_LINK}`,
+    text: buildSearchCompletionMessage({
+      matchCount,
+      galleryLink: GALLERY_LINK,
+    }),
   });
 };
 export const aiServices = {
