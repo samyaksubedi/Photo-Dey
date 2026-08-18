@@ -3,6 +3,7 @@ import { ApiError } from '../../utils/api-output.util.js';
 import { photoRepository } from '../photos/photos.repository.js';
 import { eventRepository } from './events.repository.js';
 import { deleteSourceFiles } from './events.upload.js';
+import { enqueueAiCleanup } from '../../jobs/ai-cleanup/ai-cleanup.producer.js';
 
 const getEvents = async (data: { userId: string }) => {
   //  Get all events  of the user
@@ -71,6 +72,7 @@ const deleteEvent = async (data: { eventId: string; userId: string }) => {
     .filter((publicId): publicId is string => Boolean(publicId));
 
   await deleteSourceFiles({ publicIds, type: 'image' });
+  await enqueueAiCleanup({ eventId: data.eventId });
   await eventRepository.deleteById(data.eventId);
 };
 const getStatus = async (data: { eventId: string; userId: string }) => {
