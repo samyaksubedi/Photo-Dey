@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight, CheckCircle2, LoaderCircle, Mail, Send } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Brand } from '../components/Brand';
 import { useAuth } from '../context/AuthContext';
 import { ApiClientError, apiRequest } from '../lib/api';
@@ -26,15 +26,13 @@ function AuthShell({ children, asideTitle, asideCopy }: { children: ReactNode; a
 }
 
 export function SignInPage() {
-  const { signIn, user } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-
-  if (user) return <Navigate to="/dashboard" replace />;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -73,15 +71,13 @@ export function SignInPage() {
 }
 
 export function SignUpPage() {
-  const { signUp, user } = useAuth();
+  const { signUp } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [complete, setComplete] = useState(false);
-
-  if (user) return <Navigate to="/dashboard" replace />;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();

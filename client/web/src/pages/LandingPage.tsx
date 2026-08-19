@@ -11,8 +11,13 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Brand } from '../components/Brand';
+import { useAuth } from '../context/AuthContext';
 
 export function LandingPage() {
+  const { user, loading } = useAuth();
+  const workspacePath = user || loading ? '/dashboard' : '/sign-up';
+  const workspaceLabel = loading ? 'Open PhotoDey' : user ? 'Open dashboard' : 'Create your event';
+
   return (
     <main className="landing-shell">
       <nav className="nav container" aria-label="Main navigation">
@@ -23,10 +28,8 @@ export function LandingPage() {
           <a href="#privacy">Privacy</a>
         </div>
         <div className="nav-actions">
-          <Link className="text-link" to="/sign-in">Sign in</Link>
-          <Link className="button button-dark button-small" to="/sign-up">
-            Create an event <ArrowUpRight size={15} />
-          </Link>
+          {!loading && user ? <Link className="text-link" to="/dashboard/account">Account</Link> : !loading ? <Link className="text-link" to="/sign-in">Sign in</Link> : null}
+          <Link className="button button-dark button-small" to={workspacePath}>{loading ? 'Open PhotoDey' : user ? 'Dashboard' : 'Create an event'} <ArrowUpRight size={15} /></Link>
         </div>
       </nav>
 
@@ -39,8 +42,8 @@ export function LandingPage() {
             making anyone scroll through hundreds that don’t.
           </p>
           <div className="hero-actions">
-            <Link className="button button-accent" to="/sign-up">
-              Create your event <ArrowUpRight size={17} />
+            <Link className="button button-accent" to={workspacePath}>
+              {workspaceLabel} <ArrowUpRight size={17} />
             </Link>
             <a className="button button-quiet" href="#how-it-works">See how it works</a>
           </div>
@@ -123,7 +126,7 @@ export function LandingPage() {
               <li><Check size={15} /> Public access you control</li>
               <li><Check size={15} /> One link for the whole event</li>
             </ul>
-            <Link className="inline-action" to="/sign-up">Start with your first event <ArrowRight size={17} /></Link>
+            <Link className="inline-action" to={workspacePath}>{loading ? 'Open PhotoDey' : user ? 'Return to your events' : 'Start with your first event'} <ArrowRight size={17} /></Link>
           </div>
           <div className="editorial-photo editorial-photo-side" />
         </div>
@@ -150,13 +153,13 @@ export function LandingPage() {
       <section className="final-cta container">
         <p className="section-kicker">Your moments, our focus.</p>
         <h2>Make every guest part<br />of the gallery.</h2>
-        <Link className="button button-accent" to="/sign-up">Create your event <ArrowUpRight size={17} /></Link>
+        <Link className="button button-accent" to={workspacePath}>{workspaceLabel} <ArrowUpRight size={17} /></Link>
       </section>
 
       <footer className="site-footer">
         <div className="container footer-grid">
           <div><Brand light /><p>Private photo discovery for memorable events.</p></div>
-          <div><span>Product</span><a href="#how-it-works">How it works</a><Link to="/sign-in">Organizer sign in</Link></div>
+          <div><span>Product</span><a href="#how-it-works">How it works</a><Link to={user || loading ? '/dashboard' : '/sign-in'}>{loading ? 'Open PhotoDey' : user ? 'Organizer dashboard' : 'Organizer sign in'}</Link></div>
           <div><span>Guests</span><a href="#privacy">Privacy</a><a href="mailto:hello@photodey.com">Support</a></div>
           <p className="footer-note">© {new Date().getFullYear()} PhotoDey</p>
         </div>

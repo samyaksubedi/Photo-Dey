@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import { DashboardLayout } from './components/DashboardLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { GuestOnlyRoute } from './components/GuestOnlyRoute';
 import { CreateEventPage } from './pages/CreateEventPage';
 import { DashboardPage, EventsPage } from './pages/DashboardPage';
 import { EventDetailPage } from './pages/EventDetailPage';
@@ -15,9 +16,11 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/sign-in" element={<SignInPage />} />
-      <Route path="/sign-up" element={<SignUpPage />} />
-      <Route path="/resend-verification" element={<ResendVerificationPage />} />
+      <Route element={<GuestOnlyRoute />}>
+        <Route path="/sign-in" element={<SignInPage />} />
+        <Route path="/sign-up" element={<SignUpPage />} />
+        <Route path="/resend-verification" element={<ResendVerificationPage />} />
+      </Route>
       <Route path="/verify/:token" element={<VerifyEmailPage />} />
       <Route path="/auth/verify/:token" element={<VerifyEmailPage />} />
       <Route path="/e/:publicCode" element={<PublicEventPage />} />

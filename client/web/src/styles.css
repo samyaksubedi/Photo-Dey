@@ -30,7 +30,8 @@ img { display: block; max-width: 100%; }
 .landing-shell { min-height: 100vh; overflow: hidden; }
 .nav { height: 88px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
 .wordmark { display: inline-flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 600; letter-spacing: -0.04em; }
-.wordmark-mark { width: 31px; height: 31px; display: grid; place-items: center; color: white; background: var(--ink); border-radius: 9px; }
+.wordmark-mark { width: 38px; height: 38px; display: grid; place-items: center; overflow: hidden; background: white; border-radius: 10px; box-shadow: 0 3px 12px rgba(29,23,48,.08); }
+.wordmark-mark img { width: 100%; height: 100%; object-fit: cover; }
 .nav-links { display: flex; align-items: center; gap: 34px; font-size: 13px; color: #45434b; }
 .nav-links a, .text-link { transition: opacity 160ms ease; }
 .nav-links a:hover, .text-link:hover { opacity: .56; }
@@ -114,7 +115,7 @@ img { display: block; max-width: 100%; }
 .site-footer { color: #d9d6de; background: var(--ink); }
 .footer-grid { min-height: 250px; display: grid; grid-template-columns: 1fr auto auto; gap: 70px; align-items: start; padding-block: 62px 35px; }
 .wordmark-light { color: white; }
-.wordmark-light .wordmark-mark { color: var(--ink); background: white; }
+.wordmark-light .wordmark-mark { background: white; }
 .footer-grid > div:first-child > p { max-width: 310px; margin: 18px 0 0; color: #7e7b85; font-family: 'Instrument Serif', serif; font-size: 17px; font-style: italic; }
 .footer-grid > div:not(:first-child) { min-width: 125px; display: grid; gap: 10px; color: #aaa7af; font-size: 11px; }
 .footer-grid > div:not(:first-child) span { margin-bottom: 4px; color: #686670; font-size: 9px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; }
