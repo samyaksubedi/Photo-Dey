@@ -14,7 +14,7 @@ http:
     type: json
     data: |-
       {
-        "publicEnabled": false
+        "publicEnabled": true
       }
   auth: inherit
 
