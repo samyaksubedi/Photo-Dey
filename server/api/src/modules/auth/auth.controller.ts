@@ -1,4 +1,4 @@
-import type { CookieOptions, RequestHandler } from 'express';
+import type { RequestHandler } from 'express';
 import type {
   EmailInput,
   SignInInput,
@@ -9,18 +9,6 @@ import { authService } from './auth.service.js';
 import { ApiError, ApiResponse } from '../../utils/api-output.util.js';
 import { getDeviceInfo } from './auth.device.js';
 import { envVariables } from '../../configs/env.config.js';
-
-const usesCrossSiteAuthCookie =
-  new URL(envVariables.CLIENT_URL).hostname !==
-  new URL(envVariables.SERVER_URL).hostname;
-
-const refreshTokenCookieOptions: CookieOptions = {
-  httpOnly: true,
-  secure: envVariables.NODE_ENV === 'production' || usesCrossSiteAuthCookie,
-  sameSite: usesCrossSiteAuthCookie ? 'none' : 'strict',
-  path: '/',
-};
-
 export const signUp: RequestHandler = async (req, res, next) => {
   try {
     const body = req.body as SignUpInput;
@@ -80,7 +68,9 @@ export const signIn: RequestHandler = async (req, res, next) => {
     const { accessToken, refreshToken, refreshTokenExpires, user } =
       await authService.signIn({ ...body, deviceInfo, ipAddress });
     res.cookie('refreshToken', refreshToken, {
-      ...refreshTokenCookieOptions,
+      httpOnly: true,
+      secure: envVariables.NODE_ENV == 'production',
+      sameSite: 'strict',
       expires: refreshTokenExpires,
     });
 
@@ -101,7 +91,11 @@ export const logout: RequestHandler = async (req, res, next) => {
   try {
     const { sessionId } = req.user;
     await authService.logout({ sessionId });
-    res.clearCookie('refreshToken', refreshTokenCookieOptions);
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: envVariables.NODE_ENV == 'production',
+      sameSite: 'strict',
+    });
     return res
       .status(200)
       .json(new ApiResponse(200, null, 'User logged out successfully'));
@@ -113,7 +107,11 @@ export const logoutFromAllDevices: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const deviceCount = await authService.logoutFromAllDevices({ userId });
-    res.clearCookie('refreshToken', refreshTokenCookieOptions);
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: envVariables.NODE_ENV == 'production',
+      sameSite: 'strict',
+    });
     return res
       .status(200)
       .json(
