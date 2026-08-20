@@ -7,6 +7,7 @@ import { searchRequestRepository } from '../search-request/search_req.repository
 import { telegramSessionRepository } from './telegram-session.repository.js';
 import { downloadFile, getFile, sendMessage } from './telegram.api.js';
 import type { PhotoSize } from 'typegram';
+import { logger } from '../../configs/logger.config.js';
 const handleStart = async (data: { chatId: string; publicCode?: string }) => {
   if (!data.publicCode) {
     return sendMessage({
@@ -135,6 +136,7 @@ const handleSelfieUpload = async (data: {
     data.chatId,
   );
   if (!telegramSession) {
+    logger.error('No telegram session found for user !');
     return;
   }
   const event = await eventRepository.findById(telegramSession.eventId);
