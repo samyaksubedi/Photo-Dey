@@ -6,25 +6,96 @@ import type {
   GetEventInput,
   GetStatusInput,
   UpdatePublicAccessBody,
+  UploadPhotoBatchBody,
 } from './events.schema.js';
+import { uploadPhotoBatchSchema } from './events.schema.js';
 import { ApiError, ApiResponse } from '../../utils/api-output.util.js';
+import {
+  getPhotoBatchBytes,
+  isPhotoBatchWithinLimit,
+  MAX_PHOTO_BATCH_BYTES,
+} from './event-upload.util.js';
+import { deleteTempFile } from '../../utils/file.util.js';
 
 export const createEvent: RequestHandler = async (req, res, next) => {
   try {
-    const photos = req.files as Express.Multer.File[];
     const body = req.body as CreateEventBody;
     const userId = req.user.id;
-    if (!Array.isArray(photos) || photos.length === 0) {
-      throw new ApiError(400, 'At least one photo is required');
-    }
     const event = await eventServices.createEvent({
       name: body.name,
-      photos,
+      expectedTotalPhotos: body.expectedTotalPhotos,
       userId,
     });
     return res
       .status(201)
-      .json(new ApiResponse(201, { event }, 'Event created successfully'));
+      .json(
+        new ApiResponse(
+          201,
+          { eventId: event.id, event },
+          'Event created successfully',
+        ),
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+export const uploadEventPhotoBatch: RequestHandler = async (req, res, next) => {
+  const photos = req.files as Express.Multer.File[];
+
+  const cleanupReceivedFiles = async () => {
+    if (!Array.isArray(photos)) return;
+    await Promise.allSettled(photos.map((photo) => deleteTempFile(photo.path)));
+  };
+
+  if (!Array.isArray(photos) || photos.length === 0) {
+    await cleanupReceivedFiles();
+    return next(new ApiError(400, 'At least one photo is required'));
+  }
+
+  const parsedBody = uploadPhotoBatchSchema.safeParse(req.body);
+  if (!parsedBody.success) {
+    await cleanupReceivedFiles();
+    return next(
+      new ApiError(
+        400,
+        'A valid clientBatchId is required',
+        parsedBody.error.issues,
+      ),
+    );
+  }
+
+  if (!isPhotoBatchWithinLimit(photos)) {
+    await cleanupReceivedFiles();
+    return next(
+      new ApiError(
+        413,
+        `Photo batch must not exceed ${MAX_PHOTO_BATCH_BYTES / 1024 / 1024} MiB`,
+      ),
+    );
+  }
+
+  try {
+    const params = req.params as GetEventInput;
+    const body = parsedBody.data as UploadPhotoBatchBody;
+    const batch = await eventServices.uploadEventPhotoBatch({
+      eventId: params.eventId,
+      userId: req.user.id,
+      clientBatchId: body.clientBatchId,
+      photos,
+      totalBytes: getPhotoBatchBytes(photos),
+    });
+
+    return res
+      .status(batch.idempotent ? 200 : 202)
+      .json(
+        new ApiResponse(
+          batch.idempotent ? 200 : 202,
+          { batch },
+          batch.idempotent
+            ? 'Photo batch already accepted'
+            : 'Photo batch accepted',
+        ),
+      );
   } catch (error) {
     next(error);
   }

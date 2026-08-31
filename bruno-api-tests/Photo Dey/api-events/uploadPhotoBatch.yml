@@ -1,0 +1,30 @@
+info:
+  name: uploadPhotoBatch
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: http://localhost:3000/api/v1/events/:eventId/photos/batches
+  params:
+    - name: eventId
+      value: replace-with-created-event-id
+      type: path
+  body:
+    type: multipart-form
+    data:
+      - name: clientBatchId
+        type: text
+        value: 189218d8-e8d9-4fba-9f2c-df36d2ace222
+      - name: photos
+        type: file
+        value:
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0059.JPG
+          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0060.JPG
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -42,6 +42,7 @@ export type EventSummary = {
   publicEnabled: boolean;
   name: string;
   totalPhotos: number;
+  receivedPhotos: number;
   uploadedPhotos: number;
   failedPhotos: number;
   status: EventStatus;
@@ -57,6 +58,7 @@ export type EventDetail = EventSummary & {
 export type EventProcessingStatus = {
   status: EventStatus;
   totalPhotos: number;
+  receivedPhotos: number;
   uploadedPhotos: number;
   processingPhotos: number;
   completedPhotos: number;

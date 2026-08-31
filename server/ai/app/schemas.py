@@ -22,6 +22,7 @@ class SearchJob(CamelModel):
 
 class EventCleanupJob(CamelModel):
     event_id: str = Field(alias="eventId")
+    photo_id: str | None = Field(default=None, alias="photoId")
 
 
 class PhotoStatusCallback(CamelModel):

@@ -1,6 +1,7 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { randomUUID } from 'node:crypto';
 import { ApiError } from '../utils/api-output.util.js';
 
 const baseUploadPath = path.resolve('./uploads');
@@ -13,7 +14,7 @@ const storage = multer.diskStorage({
 
   filename: (req, file, cb) => {
     const sanitizedFileName = file.originalname.replace(/\s+/g, '-');
-    cb(null, `${Date.now()}-${sanitizedFileName}`);
+    cb(null, `${randomUUID()}-${sanitizedFileName}`);
   },
 });
 const fileFilter: multer.Options['fileFilter'] = (req, file, cb) => {
@@ -25,7 +26,6 @@ const fileFilter: multer.Options['fileFilter'] = (req, file, cb) => {
   ];
 
   if (!allowedMimeTypes.includes(file.mimetype)) {
-    
     return cb(
       new ApiError(400, 'Only JPG, JPEG, PNG, and WEBP images are allowed'),
     );

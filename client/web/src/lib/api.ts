@@ -131,26 +131,53 @@ export const apiRequest = async <T>(
   return payload;
 };
 
-export const uploadEvent = (
-  formData: FormData,
-  onProgress: (progress: number) => void,
+export const createEvent = (data: {
+  name: string;
+  expectedTotalPhotos: number;
+}) =>
+  apiRequest<{ eventId: string }>('/events', {
+    method: 'POST',
+    authenticated: true,
+    body: JSON.stringify(data),
+  });
+
+export type PhotoBatchResponse = {
+  batch: {
+    clientBatchId: string;
+    acceptedPhotos: number;
+    totalBytes: number;
+    receivedPhotos: number;
+    totalPhotos: number;
+    idempotent: boolean;
+  };
+};
+
+export const uploadEventPhotoBatch = (
+  eventId: string,
+  clientBatchId: string,
+  files: File[],
+  onProgress: (loaded: number, total: number) => void,
 ) =>
-  new Promise<ApiEnvelope<{ event: { id: string } }>>((resolve, reject) => {
+  new Promise<ApiEnvelope<PhotoBatchResponse>>((resolve, reject) => {
     const executeUpload = (retryOnUnauthorized: boolean) => {
+      const formData = new FormData();
+      formData.append('clientBatchId', clientBatchId);
+      files.forEach((file) => formData.append('photos', file));
+
       const request = new XMLHttpRequest();
-      request.open('POST', `${API_ROOT}/events`);
+      request.open('POST', `${API_ROOT}/events/${eventId}/photos/batches`);
       request.withCredentials = true;
       if (accessToken) request.setRequestHeader('Authorization', `Bearer ${accessToken}`);
       request.upload.addEventListener('progress', (event) => {
         if (event.lengthComputable) {
-          onProgress(Math.round((event.loaded / event.total) * 100));
+          onProgress(event.loaded, event.total);
         }
       });
       request.addEventListener('load', async () => {
         if (request.status === 401 && retryOnUnauthorized) {
           const token = await refreshAccessToken();
           if (token) {
-            onProgress(0);
+            onProgress(0, files.reduce((total, file) => total + file.size, 0));
             executeUpload(false);
             return;
           }
@@ -158,7 +185,7 @@ export const uploadEvent = (
         }
 
         try {
-          const payload = JSON.parse(request.responseText) as ApiEnvelope<{ event: { id: string } }>;
+          const payload = JSON.parse(request.responseText) as ApiEnvelope<PhotoBatchResponse>;
           if (request.status >= 200 && request.status < 300 && payload.success) {
             resolve(payload);
           } else {

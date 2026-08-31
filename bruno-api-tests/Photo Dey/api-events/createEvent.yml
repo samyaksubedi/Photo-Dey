@@ -7,33 +7,12 @@ http:
   method: POST
   url: http://localhost:3000/api/v1/events
   body:
-    type: multipart-form
-    data:
-      - name: name
-        type: text
-        value: SD Photos
-      - name: photos
-        type: file
-        value:
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0059.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0060.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0061.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0062.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0063.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0064.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0065.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0066.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0067.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0068.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0070.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0074.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0075.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0076.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0078.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0079.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0080.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0081.JPG
-          - C:\Users\Acer\OneDrive\Desktop\D5100\New SD Photos\DSC_0082.JPG
+    type: json
+    data: |-
+      {
+        "name": "SD Photos",
+        "expectedTotalPhotos": 2
+      }
   auth: inherit
 
 settings:

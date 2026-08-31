@@ -6,10 +6,12 @@ import {
   Download,
   ExternalLink,
   ImageOff,
+  ImagePlus,
   LoaderCircle,
   Maximize2,
   Power,
   Trash2,
+  UploadCloud,
   X,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -19,6 +21,12 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { PageLoader } from '../components/PageState';
 import { StatusBadge } from '../components/StatusBadge';
 import { apiRequest } from '../lib/api';
+import {
+  buildPhotoBatches,
+  uploadPhotoBatches,
+  type PhotoBatch,
+  type PhotoUploadProgress,
+} from '../lib/photo-upload';
 import type { EventDetail, EventProcessingStatus, Photo } from '../types';
 
 export function EventDetailPage() {
@@ -26,9 +34,18 @@ export function EventDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const qrRef = useRef<HTMLDivElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const addSessionRef = useRef<{
+    batches: PhotoBatch[];
+    completedBatchIds: Set<string>;
+  } | null>(null);
   const [copied, setCopied] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [viewingPhoto, setViewingPhoto] = useState<Photo | null>(null);
+  const [confirmPhotoDelete, setConfirmPhotoDelete] = useState<Photo | null>(null);
+  const [addingPhotos, setAddingPhotos] = useState(false);
+  const [addProgress, setAddProgress] = useState<PhotoUploadProgress | null>(null);
+  const [addError, setAddError] = useState('');
 
   const eventQuery = useQuery({
     queryKey: ['event', eventId],
@@ -66,6 +83,72 @@ export function EventDetailPage() {
       navigate('/dashboard/events');
     },
   });
+  const deletePhotoMutation = useMutation({
+    mutationFn: async (photoId: string) =>
+      apiRequest(`/photos/${photoId}`, {
+        method: 'DELETE',
+        authenticated: true,
+      }),
+    onSuccess: () => {
+      setViewingPhoto(null);
+      setConfirmPhotoDelete(null);
+      void queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      void queryClient.invalidateQueries({ queryKey: ['event-status', eventId] });
+      void queryClient.invalidateQueries({ queryKey: ['event-photos', eventId] });
+      void queryClient.invalidateQueries({ queryKey: ['events'] });
+    },
+  });
+
+  const runAddPhotoUpload = async () => {
+    const session = addSessionRef.current;
+    if (!session || !eventId) return;
+    setAddingPhotos(true);
+    setAddError('');
+    try {
+      await uploadPhotoBatches({
+        eventId,
+        batches: session.batches,
+        completedBatchIds: session.completedBatchIds,
+        onProgress: setAddProgress,
+      });
+      addSessionRef.current = null;
+      setAddingPhotos(false);
+      setAddProgress(null);
+      void queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      void queryClient.invalidateQueries({ queryKey: ['event-status', eventId] });
+      void queryClient.invalidateQueries({ queryKey: ['event-photos', eventId] });
+      void queryClient.invalidateQueries({ queryKey: ['events'] });
+    } catch (caught) {
+      setAddingPhotos(false);
+      setAddError(
+        caught instanceof Error
+          ? `${caught.message} Retry to continue without duplicates.`
+          : 'Could not add the photographs',
+      );
+    }
+  };
+
+  const addPhotos = (incoming: File[]) => {
+    const valid = incoming
+      .filter(
+        (file) =>
+          ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type) &&
+          file.size <= 20 * 1024 * 1024,
+      )
+      .slice(0, 1000);
+    if (!valid.length) {
+      setAddError('Choose JPG, PNG, or WEBP images under 20 MB.');
+      return;
+    }
+    if (valid.length !== incoming.length) {
+      setAddError('Some unsupported or oversized files were skipped.');
+    }
+    addSessionRef.current = {
+      batches: buildPhotoBatches(valid),
+      completedBatchIds: new Set<string>(),
+    };
+    void runAddPhotoUpload();
+  };
 
   if (eventQuery.isLoading || statusQuery.isLoading) return <PageLoader label="Opening event" />;
   if (!event || !status) return <div className="empty-state"><h2>Event not found.</h2><Link to="/dashboard/events">Return to events</Link></div>;
@@ -95,7 +178,9 @@ export function EventDetailPage() {
   return (
     <>
       <Link className="back-link" to="/dashboard/events"><ArrowLeft size={15} />All events</Link>
-      <div className="event-detail-head"><div><div className="event-title-line"><StatusBadge status={status.status} /><span>{new Date(event.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span></div><h1>{event.name}</h1><p>{status.totalPhotos} photographs in this event</p></div><div className="head-actions"><button className="button button-quiet" onClick={() => toggleMutation.mutate(!event.publicEnabled)} disabled={toggleMutation.isPending}><Power size={15} />Public access {event.publicEnabled ? 'on' : 'off'}</button><button className="icon-button danger-button" onClick={() => setConfirmDelete(true)} aria-label="Delete event"><Trash2 size={17} /></button></div></div>
+      <div className="event-detail-head"><div><div className="event-title-line"><StatusBadge status={status.status} /><span>{new Date(event.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span></div><h1>{event.name}</h1><p>{status.receivedPhotos} of {status.totalPhotos} photographs received</p></div><div className="head-actions"><input ref={photoInputRef} hidden multiple type="file" accept="image/jpeg,image/png,image/webp" onChange={(inputEvent) => { const incoming = Array.from(inputEvent.target.files ?? []); inputEvent.target.value = ''; addPhotos(incoming); }} /><button className="button button-accent" onClick={() => addSessionRef.current ? void runAddPhotoUpload() : photoInputRef.current?.click()} disabled={addingPhotos}>{addingPhotos ? <LoaderCircle className="spin" size={15} /> : addSessionRef.current ? <UploadCloud size={15} /> : <ImagePlus size={15} />}{addingPhotos ? 'Sending photos' : addSessionRef.current ? 'Retry photos' : 'Add photographs'}</button><button className="button button-quiet" onClick={() => toggleMutation.mutate(!event.publicEnabled)} disabled={toggleMutation.isPending}><Power size={15} />Public access {event.publicEnabled ? 'on' : 'off'}</button><button className="icon-button danger-button" onClick={() => setConfirmDelete(true)} aria-label="Delete event"><Trash2 size={17} /></button></div></div>
+
+      {(addProgress || addError) && <div className="upload-progress event-add-progress">{addProgress && <><div><span>Sending additional photographs</span><strong>{addProgress.percent}%</strong></div><i><span style={{ width: `${addProgress.percent}%` }} /></i><div className="upload-count-progress"><strong>{addProgress.sentPhotos} of {addProgress.totalPhotos} photos sent</strong><span>{addProgress.remainingPhotos} remaining</span></div><p>{addProgress.completedBatches} completed · {addProgress.activeBatches} uploading · {addProgress.waitingBatches} waiting</p></>}{addError && <p className="form-error">{addError}</p>}</div>}
 
       <section className="processing-panel"><div className="processing-copy"><p className="section-kicker">Processing progress</p><h2>{ready ? 'Your event is ready to share.' : 'Preparing every photograph.'}</h2><p>{ready ? 'Guests can now use the public event link to find their moments.' : 'Face matching runs one photograph at a time. This page updates automatically.'}</p></div><div className="progress-ring" style={{ '--progress': `${progress * 3.6}deg` } as CSSProperties}><span><strong>{progress}%</strong><small>complete</small></span></div><div className="processing-stats"><div><strong>{status.uploadedPhotos}</strong><span>Uploaded</span></div><div><strong>{status.processingPhotos}</strong><span>Processing</span></div><div><strong>{status.completedPhotos}</strong><span>Completed</span></div><div><strong>{status.failedPhotos}</strong><span>Failed</span></div></div></section>
 
@@ -106,7 +191,8 @@ export function EventDetailPage() {
       </div>
 
       {confirmDelete && <div className="modal-backdrop"><div className="confirm-modal"><span className="danger-icon"><Trash2 size={20} /></span><p className="section-kicker">Permanent action</p><h2>Delete {event.name}?</h2><p>This removes the event, Cloudinary photographs, guest sessions, and Qdrant embeddings. It cannot be undone.</p>{deleteMutation.error && <p className="form-error">{deleteMutation.error.message}</p>}<div><button className="button button-quiet" onClick={() => setConfirmDelete(false)}>Keep event</button><button className="button button-danger" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>{deleteMutation.isPending ? <LoaderCircle className="spin" size={16} /> : <Trash2 size={15} />}Delete event</button></div></div></div>}
-      {viewingPhoto?.secureUrl && <div className="lightbox organizer-lightbox" role="dialog" aria-modal="true" aria-label="Event photograph viewer"><button className="lightbox-close" onClick={() => setViewingPhoto(null)} aria-label="Close photograph"><X size={20} /></button><img src={viewingPhoto.secureUrl} alt="Selected event photograph" /><div className="organizer-lightbox-actions"><span>{viewingPhoto.status.replace('_', ' ')}</span><a className="button button-light" href={viewingPhoto.secureUrl} target="_blank" rel="noreferrer"><Download size={16} />Open original</a></div></div>}
+      {viewingPhoto?.secureUrl && <div className="lightbox organizer-lightbox" role="dialog" aria-modal="true" aria-label="Event photograph viewer"><button className="lightbox-close" onClick={() => setViewingPhoto(null)} aria-label="Close photograph"><X size={20} /></button><img src={viewingPhoto.secureUrl} alt="Selected event photograph" /><div className="organizer-lightbox-actions"><span>{viewingPhoto.status.replace('_', ' ')}</span><button className="button button-danger" onClick={() => setConfirmPhotoDelete(viewingPhoto)}><Trash2 size={16} />Delete photo</button><a className="button button-light" href={viewingPhoto.secureUrl} target="_blank" rel="noreferrer"><Download size={16} />Open original</a></div></div>}
+      {confirmPhotoDelete && <div className="modal-backdrop photo-delete-modal"><div className="confirm-modal"><span className="danger-icon"><Trash2 size={20} /></span><p className="section-kicker">Permanent action</p><h2>Delete this photograph?</h2><p>This removes the image from the event, Cloudinary, guest matches, and face-search index.</p>{deletePhotoMutation.error && <p className="form-error">{deletePhotoMutation.error.message}</p>}<div><button className="button button-quiet" onClick={() => setConfirmPhotoDelete(null)} disabled={deletePhotoMutation.isPending}>Keep photo</button><button className="button button-danger" onClick={() => deletePhotoMutation.mutate(confirmPhotoDelete.id)} disabled={deletePhotoMutation.isPending}>{deletePhotoMutation.isPending ? <LoaderCircle className="spin" size={16} /> : <Trash2 size={15} />}Delete photo</button></div></div></div>}
     </>
   );
 }

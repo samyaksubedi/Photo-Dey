@@ -27,6 +27,14 @@ async def main() -> None:
             data = EventCleanupJob.model_validate(job.data)
         except ValidationError as error:
             raise UnrecoverableError(f"Invalid cleanup job: {error}") from error
+        if data.photo_id:
+            await cleanup_service.cleanup_photo(data.event_id, data.photo_id)
+            return {
+                "eventId": data.event_id,
+                "photoId": data.photo_id,
+                "deleted": True,
+            }
+
         await cleanup_service.cleanup(data.event_id)
         return {"eventId": data.event_id, "deleted": True}
 

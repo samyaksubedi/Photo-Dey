@@ -7,6 +7,11 @@ export type EnqueueAiCleanupInput = {
   eventId: string;
 };
 
+export type EnqueuePhotoAiCleanupInput = {
+  eventId: string;
+  photoId: string;
+};
+
 export const getDeletedEventKey = (eventId: string) =>
   `${DELETED_EVENT_KEY_PREFIX}${eventId}`;
 
@@ -15,6 +20,22 @@ export const enqueueAiCleanup = async (data: EnqueueAiCleanupInput) => {
 
   await aiCleanupQueue.add('delete-event-vectors', data, {
     jobId: `delete-event-${data.eventId}`,
+    attempts: 5,
+    backoff: {
+      type: 'exponential',
+      delay: 4000,
+    },
+    removeOnComplete: {
+      count: 1000,
+    },
+  });
+};
+
+export const enqueuePhotoAiCleanup = async (
+  data: EnqueuePhotoAiCleanupInput,
+) => {
+  await aiCleanupQueue.add('delete-photo-vectors', data, {
+    jobId: `delete-photo-${data.photoId}`,
     attempts: 5,
     backoff: {
       type: 'exponential',

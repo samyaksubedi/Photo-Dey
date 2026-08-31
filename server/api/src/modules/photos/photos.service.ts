@@ -4,6 +4,8 @@ import { eventRepository } from '../events/events.repository.js';
 import { deleteSourceFile } from '../events/events.upload.js';
 
 import { photoRepository } from './photos.repository.js';
+import { enqueuePhotoAiCleanup } from '../../jobs/ai-cleanup/ai-cleanup.producer.js';
+import { deleteTempFile } from '../../utils/file.util.js';
 
 const getPhotos = async (data: { userId: string; eventId: string }) => {
   const event = await eventRepository.findByIdAndUserId(
@@ -41,8 +43,17 @@ const deletePhoto = async (data: { userId: string; photoId: string }) => {
     await deleteSourceFile({ publicId: photo.publicId, type: 'image' });
   } else {
     logger.error('PublicId not found while deleting photo', { ...photo });
+    if (photo.localPath) await deleteTempFile(photo.localPath);
   }
-  await photoRepository.deleteById(data.photoId);
-  // TODO : This deletion should change the counts / analytics too like total photos , completed photos bla bla ...
+  await enqueuePhotoAiCleanup({
+    eventId: photo.eventId,
+    photoId: photo.id,
+  });
+
+  const deleted = await photoRepository.deleteByIdAndUpdateEvent(
+    data.photoId,
+    data.userId,
+  );
+  if (!deleted) throw new ApiError(404, 'Photo not found');
 };
 export const photoServices = { getPhoto, getPhotos, deletePhoto };

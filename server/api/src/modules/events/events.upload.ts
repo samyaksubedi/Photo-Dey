@@ -43,7 +43,7 @@ export const deleteSourceFile = async (data: DeleteSourceFileInput) => {
     resource_type: 'image',
   });
 
-  if (result.result !== 'ok') {
+  if (result.result !== 'ok' && result.result !== 'not found') {
     throw new ApiError(
       400,
       `Failed to delete asset from Cloudinary: ${result.result}`,

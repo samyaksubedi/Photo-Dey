@@ -8,6 +8,7 @@ import {
   getEvents,
   getStatus,
   updatePublicAccess,
+  uploadEventPhotoBatch,
 } from './events.controller.js';
 import { upload } from '../../middlewares/upload.middleware.js';
 import {
@@ -18,16 +19,21 @@ import {
   updatePublicAccessSchema,
 } from './events.schema.js';
 
-
 export const router = express.Router();
 
 router.get('/', authenticateUser, getEvents);
 router.post(
   '/',
   authenticateUser,
-  upload.array('photos', 1000),
   validate({ schema: createEventSchema }),
   createEvent,
+);
+router.post(
+  '/:eventId/photos/batches',
+  authenticateUser,
+  validate({ schema: getEventSchema, source: 'params' }),
+  upload.array('photos', 1000),
+  uploadEventPhotoBatch,
 );
 router.patch(
   '/:eventId/public-access',

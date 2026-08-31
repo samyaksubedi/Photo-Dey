@@ -2,7 +2,10 @@ import { Worker, Job } from 'bullmq';
 import { redisConnection } from '../../configs/redis.config.js';
 import { logger } from '../../configs/logger.config.js';
 import { UPLOAD_QUEUE_KEY } from './upload.queue.js';
-import { uploadSourceFile } from '../../modules/events/events.upload.js';
+import {
+  deleteSourceFile,
+  uploadSourceFile,
+} from '../../modules/events/events.upload.js';
 import { eventRepository } from '../../modules/events/events.repository.js';
 import { photoRepository } from '../../modules/photos/photos.repository.js';
 import { enqueueAi } from '../ai/ai.producer.js';
@@ -10,6 +13,7 @@ import { searchRequestRepository } from '../../modules/search-request/search_req
 import { enqueueSearch } from '../search/search.producer.js';
 import { sendMessage } from '../../modules/telegram/telegram.api.js';
 import { deleteTempFile } from '../../utils/file.util.js';
+import { getEventStatusFromCounters } from '../../modules/events/event-upload.util.js';
 
 export type ProcessUploadQueueInput =
   | {
@@ -29,14 +33,9 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
   // Update event counters for photos
   // Update photo : data , status
   const data = job.data;
-  const { publicId, secureUrl } = await uploadSourceFile({
-    filePath: data.filePath,
-    jobType: data.jobType,
-  });
   switch (data.jobType) {
     case 'event-photo': {
       const event = await eventRepository.findById(data.eventId);
-      // const photo = await photoRepository.findById(data.photoId);
       const photo = await photoRepository.findByIdAndUserId(
         data.photoId,
         data.userId,
@@ -47,15 +46,34 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
       if (!photo) {
         return;
       }
-      const uploadedPhotos = event.uploadedPhotos;
-      await eventRepository.updateEvent(data.eventId, data.userId, {
-        uploadedPhotos: uploadedPhotos + 1,
+
+      const { publicId, secureUrl } = await uploadSourceFile({
+        filePath: data.filePath,
+        jobType: data.jobType,
       });
-      await photoRepository.updatePhoto(data.photoId, {
-        status: 'UPLOADED',
-        publicId,
-        secureUrl,
-      });
+
+      const currentPhoto = await photoRepository.findByIdAndUserId(
+        data.photoId,
+        data.userId,
+      );
+      if (!currentPhoto) {
+        await deleteSourceFile({ publicId, type: 'image' });
+        return;
+      }
+
+      try {
+        await photoRepository.updatePhoto(data.photoId, {
+          status: 'UPLOADED',
+          publicId,
+          secureUrl,
+        });
+        await eventRepository.updateEventInternal(data.eventId, {
+          uploadedPhotos: { increment: 1 },
+        });
+      } catch (error) {
+        await deleteSourceFile({ publicId, type: 'image' });
+        throw error;
+      }
 
       await enqueueAi({
         eventId: data.eventId,
@@ -77,6 +95,10 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
       if (!searchRequest) {
         return;
       }
+      const { secureUrl } = await uploadSourceFile({
+        filePath: data.filePath,
+        jobType: data.jobType,
+      });
       await searchRequestRepository.updateSearchRequest(data.searchRequestId, {
         selfieUrl: secureUrl,
       });
@@ -150,8 +172,9 @@ uploadWorker.on('failed', async (job, err) => {
     switch (data.jobType) {
       case 'event-photo': {
         const event = await eventRepository.findById(data.eventId);
+        const photo = await photoRepository.findById(data.photoId);
 
-        if (!event) {
+        if (!event || !photo || photo.status === 'FAILED') {
           return;
         }
 
@@ -159,18 +182,14 @@ uploadWorker.on('failed', async (job, err) => {
           status: 'FAILED',
         });
 
-        const failedPhotos = event.failedPhotos;
-        const totalPhotos = event.totalPhotos;
+        await eventRepository.updateEventInternal(data.eventId, {
+          failedPhotos: { increment: 1 },
+        });
 
-        if (failedPhotos === totalPhotos - 1) {
-          await eventRepository.updateEvent(data.eventId, data.userId, {
-            status: 'FAILED',
-            failedPhotos: failedPhotos + 1,
-          });
-        } else {
-          await eventRepository.updateEvent(data.eventId, data.userId, {
-            status: 'PARTIAL_FAILURE',
-            failedPhotos: failedPhotos + 1,
+        const updatedEvent = await eventRepository.findById(data.eventId);
+        if (updatedEvent) {
+          await eventRepository.updateEventInternal(data.eventId, {
+            status: getEventStatusFromCounters(updatedEvent),
           });
         }
 

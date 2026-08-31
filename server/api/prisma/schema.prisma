@@ -49,24 +49,47 @@ enum EventStatus {
   FAILED
 }
 
+enum UploadBatchStatus {
+  ACCEPTED
+  QUEUED
+}
+
 model Event {
-  id               String            @id @default(uuid())
-  publicCode       String            @unique
-  publicEnabled    Boolean           @default(true)
+  id               String             @id @default(uuid())
+  publicCode       String             @unique
+  publicEnabled    Boolean            @default(true)
   name             String
-  totalPhotos      Int               @default(0)
-  uploadedPhotos   Int               @default(0)
-  processingPhotos Int               @default(0)
-  completedPhotos  Int               @default(0)
-  failedPhotos     Int               @default(0)
-  status           EventStatus       @default(CREATED)
-  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalPhotos      Int                @default(0)
+  receivedPhotos   Int                @default(0)
+  uploadedPhotos   Int                @default(0)
+  processingPhotos Int                @default(0)
+  completedPhotos  Int                @default(0)
+  failedPhotos     Int                @default(0)
+  status           EventStatus        @default(CREATED)
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           String
   searchRequests   SearchRequest[]
   photos           Photo[]
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  uploadBatches    EventUploadBatch[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
   telegramSessions TelegramSession[]
+}
+
+model EventUploadBatch {
+  id            String            @id @default(uuid())
+  clientBatchId String
+  event         Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId       String
+  photoCount    Int
+  totalBytes    Int
+  status        UploadBatchStatus @default(ACCEPTED)
+  photos        Photo[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([eventId, clientBatchId])
+  @@index([eventId])
 }
 
 enum PhotoStatus {
@@ -85,9 +108,12 @@ model Photo {
   status            PhotoStatus       @default(PENDING_UPLOAD)
   secureUrl         String?
   publicId          String?
+  uploadBatch       EventUploadBatch? @relation(fields: [uploadBatchId], references: [id], onDelete: SetNull)
+  uploadBatchId     String?
   guestPhotoMatches GuestPhotoMatch[]
 
   @@index([eventId])
+  @@index([uploadBatchId])
 }
 
 enum SearchRequestStatus {
