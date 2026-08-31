@@ -32,7 +32,6 @@ export function DashboardLayout() {
           <span>Workspace</span>
           <NavLink end to="/dashboard" onClick={() => setOpen(false)}><LayoutGrid size={17} />Overview</NavLink>
           <NavLink to="/dashboard/events" onClick={() => setOpen(false)}><Images size={17} />Events</NavLink>
-          <NavLink to="/dashboard/events/new" onClick={() => setOpen(false)}><Plus size={17} />New event</NavLink>
           <NavLink to="/dashboard/account" onClick={() => setOpen(false)}><ShieldCheck size={17} />Account & security</NavLink>
         </nav>
         <div className="sidebar-foot">

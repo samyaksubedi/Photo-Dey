@@ -91,6 +91,10 @@ const signIn = async (data: SignInServiceInput) => {
   if (!isMatch) {
     throw new ApiError(401, 'Invalid credentials');
   }
+  if (data.requireAdmin && user.role !== 'admin') {
+    throw new ApiError(403, 'Administrator access is required');
+  }
+
   const { refreshToken, refreshTokenExpires } = generateRefreshToken();
   const userSession = await userSessionRepository.createUserSession({
     refreshToken,
@@ -112,6 +116,7 @@ const signIn = async (data: SignInServiceInput) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      role: user.role,
     },
     accessToken,
     refreshToken,

@@ -17,7 +17,8 @@ import type { User } from '../types';
 type AuthContextValue = {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<User>;
+  adminSignIn: (email: string, password: string) => Promise<User>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   signOutEverywhere: () => Promise<void>;
@@ -70,6 +71,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
         setAccessToken(response.data.accessToken);
         setUser(response.data.user);
+        return response.data.user;
+      },
+      adminSignIn: async (email, password) => {
+        const response = await apiRequest<{ accessToken: string; user: User }>(
+          '/auth/admin/signIn',
+          {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+          },
+        );
+        setAccessToken(response.data.accessToken);
+        setUser(response.data.user);
+        return response.data.user;
       },
       signUp: async (name, email, password) => {
         await apiRequest<User>('/auth/signUp', {

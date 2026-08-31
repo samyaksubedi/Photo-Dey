@@ -26,7 +26,13 @@ const validate = ({
         ),
       );
     }
-    req[source] = result.data;
+    // In Express 5, req.query is a getter-only property. Keep its validated,
+    // coerced values in response locals instead of trying to overwrite it.
+    if (source === 'query') {
+      res.locals.validatedQuery = result.data;
+    } else {
+      req[source] = result.data;
+    }
     next();
   };
 };

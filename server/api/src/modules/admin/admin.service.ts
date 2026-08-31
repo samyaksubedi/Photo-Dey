@@ -1,18 +1,8 @@
-import { userSessionRepository } from '../auth/user-session.repository.js';
-import { userRepository } from '../auth/user.repository.js';
+import type { AdminEventsQuery, AdminUsersQuery } from './admin.schema.js';
+import { adminRepository } from './admin.repository.js';
 
-const getUsers = async () => {
-  const users = await userRepository.getUsers();
-  return users;
-};
-const getAdmins = async () => {
-  const admins = await userRepository.getAdmins();
-  return admins;
-};
-const getUserSessions = async (data: { userId: string }) => {
-  const sessions = await userSessionRepository.getAllUserSessionInfo(
-    data.userId,
-  );
-  return sessions;
-};
-export const adminServices = { getUsers, getAdmins, getUserSessions };
+const getOverview = () => adminRepository.getOverview();
+const getUsers = (data: AdminUsersQuery) => adminRepository.getUsers(data);
+const getEvents = (data: AdminEventsQuery) => adminRepository.getEvents(data);
+
+export const adminServices = { getOverview, getUsers, getEvents };

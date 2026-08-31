@@ -9,6 +9,7 @@ import {
 import {
   getAllLoggedInDeviceInfo,
   getMe,
+  adminSignIn,
   logout,
   logoutFromAllDevices,
   refresh,
@@ -37,6 +38,7 @@ router.get(
   verifyUser,
 );
 router.post('/signIn', validate({ schema: signInSchema }), signIn);
+router.post('/admin/signIn', validate({ schema: signInSchema }), adminSignIn);
 router.post('/logout', authenticateUser, logout);
 router.post('/logout-all', authenticateUser, logoutFromAllDevices);
 router.get(

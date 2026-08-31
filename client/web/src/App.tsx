@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import { DashboardLayout } from './components/DashboardLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminRoute } from './components/AdminRoute';
 import { GuestOnlyRoute } from './components/GuestOnlyRoute';
 import { CreateEventPage } from './pages/CreateEventPage';
 import { DashboardPage, EventsPage } from './pages/DashboardPage';
@@ -11,6 +12,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { PublicEventPage } from './pages/PublicEventPage';
 import { ResendVerificationPage, SignInPage, SignUpPage, VerifyEmailPage } from './pages/AuthPages';
 import { AccountPage } from './pages/AccountPage';
+import { AdminDashboardPage, AdminLoginPage } from './pages/AdminPages';
 
 export default function App() {
   return (
@@ -25,6 +27,10 @@ export default function App() {
       <Route path="/auth/verify/:token" element={<VerifyEmailPage />} />
       <Route path="/e/:publicCode" element={<PublicEventPage />} />
       <Route path="/gallery/:searchRequestId" element={<GalleryPage />} />
+      <Route path="/admin" element={<AdminLoginPage />} />
+      <Route element={<AdminRoute />}>
+        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+      </Route>
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardPage />} />

@@ -65,7 +65,7 @@ export function EventsPage() {
   if (error) return <EmptyState eyebrow="Could not load" title="Your events are out of reach." body={error.message} />;
   return (
     <>
-      <div className="simple-page-head"><div><p className="section-kicker">Event library</p><h1>Every event.</h1><p>Manage processing, guest access, photographs, and QR sharing.</p></div><Link className="button button-accent" to="/dashboard/events/new"><Plus size={16} />New event</Link></div>
+      <div className="simple-page-head"><div><p className="section-kicker">Event library</p><h1>Every event.</h1><p>Manage processing, guest access, photographs, and QR sharing.</p></div></div>
       {!events?.length ? <EmptyState eyebrow="Nothing here yet" title="Create your first event." body="Your event library will live here." /> : <div className="event-card-grid">{events.map((event) => <Link className="event-card" to={`/dashboard/events/${event.id}`} key={event.id}><div className="event-card-top"><span className="event-monogram">{event.name.slice(0, 2).toUpperCase()}</span><StatusBadge status={event.status} /></div><h2>{event.name}</h2><p>{new Date(event.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</p><div className="event-card-meta"><span><strong>{event.totalPhotos}</strong>photos</span><span><strong>{event.uploadedPhotos}</strong>uploaded</span><ArrowRight size={17} /></div></Link>)}</div>}
     </>
   );

@@ -58,35 +58,43 @@ export const verifyUser: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-export const signIn: RequestHandler = async (req, res, next) => {
-  try {
-    const body = req.body as SignInInput;
-    const ipAddress = req.ip ?? 'Unknown';
+const createSignInHandler = (requireAdmin = false): RequestHandler =>
+  async (req, res, next) => {
+    try {
+      const body = req.body as SignInInput;
+      const ipAddress = req.ip ?? 'Unknown';
+      const deviceInfo = getDeviceInfo(req.headers['user-agent'] ?? '');
 
-    const deviceInfo = getDeviceInfo(req.headers['user-agent'] ?? '');
+      const { accessToken, refreshToken, refreshTokenExpires, user } =
+        await authService.signIn({
+          ...body,
+          deviceInfo,
+          ipAddress,
+          requireAdmin,
+        });
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: envVariables.NODE_ENV == 'production',
+        sameSite: 'strict',
+        expires: refreshTokenExpires,
+      });
 
-    const { accessToken, refreshToken, refreshTokenExpires, user } =
-      await authService.signIn({ ...body, deviceInfo, ipAddress });
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: envVariables.NODE_ENV == 'production',
-      sameSite: 'strict',
-      expires: refreshTokenExpires,
-    });
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            200,
+            { accessToken, user },
+            'User loggedIn successfully',
+          ),
+        );
+    } catch (error) {
+      next(error);
+    }
+  };
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          { accessToken, user },
-          'User loggedIn successfully',
-        ),
-      );
-  } catch (error) {
-    next(error);
-  }
-};
+export const signIn = createSignInHandler();
+export const adminSignIn = createSignInHandler(true);
 export const logout: RequestHandler = async (req, res, next) => {
   try {
     const { sessionId } = req.user;

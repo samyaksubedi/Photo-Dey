@@ -27,6 +27,7 @@ export type SignInServiceInput = {
   password: string;
   ipAddress: string;
   deviceInfo: DeviceInfo;
+  requireAdmin?: boolean;
 };
 
 export type AccessTokenPayload = {
