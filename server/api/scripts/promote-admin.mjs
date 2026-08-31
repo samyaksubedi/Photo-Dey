@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { PrismaClient } from '../src/generated/prisma/client.js';
+import { PrismaClient } from '../dist/generated/prisma/client.js';
 
 const email = process.argv[2]?.trim().toLowerCase();
 if (!email) {
