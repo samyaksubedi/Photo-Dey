@@ -14,6 +14,7 @@ import { enqueueSearch } from '../search/search.producer.js';
 import { sendMessage } from '../../modules/telegram/telegram.api.js';
 import { deleteTempFile } from '../../utils/file.util.js';
 import { getEventStatusFromCounters } from '../../modules/events/event-upload.util.js';
+import { envVariables } from '../../configs/env.config.js';
 
 export type ProcessUploadQueueInput =
   | {
@@ -125,6 +126,7 @@ const processUploadQueue = async (job: Job<ProcessUploadQueueInput>) => {
 };
 const uploadWorker = new Worker(UPLOAD_QUEUE_KEY, processUploadQueue, {
   connection: redisConnection,
+  concurrency: envVariables.WORKER_CONCURRENCY,
 });
 
 uploadWorker.on('completed', async (job) => {

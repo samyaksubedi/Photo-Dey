@@ -6,6 +6,7 @@ import {
   resendVerificationEmail,
 } from '../../modules/auth/auth.email.js';
 import { logger } from '../../configs/logger.config.js';
+import { envVariables } from '../../configs/env.config.js';
 const emails = {
   resendVerificationEmail,
   sendWelcomeEmail,
@@ -30,6 +31,7 @@ const processEmailQueue = async (job: Job<ProcessEmailQueueInput>) => {
 };
 const emailWorker = new Worker(EMAIL_QUEUE_KEY, processEmailQueue, {
   connection: redisConnection,
+  concurrency: envVariables.WORKER_CONCURRENCY,
 });
 
 emailWorker.on('completed', (job) => {

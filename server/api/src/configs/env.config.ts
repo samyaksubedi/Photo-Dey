@@ -17,6 +17,7 @@ const envSchema = z.object({
   ACCESS_TOKEN_SECRET: z.string().min(1),
   AI_WEBHOOK_SECRET: z.string().min(1),
   REDIS_URL: z.string().min(1),
+  WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(20).default(3),
   DATABASE_URL: z.string().min(1),
   NODE_ENV: z.enum(['development', 'production']),
   CLOUDINARY_CLOUD_NAME: z.string().min(1),
