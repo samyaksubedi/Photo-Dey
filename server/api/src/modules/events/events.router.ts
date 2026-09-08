@@ -18,6 +18,7 @@ import {
   getStatusSchema,
   updatePublicAccessSchema,
 } from './events.schema.js';
+import { MAX_EVENT_PHOTOS } from './event-upload.util.js';
 
 export const router = express.Router();
 
@@ -32,7 +33,7 @@ router.post(
   '/:eventId/photos/batches',
   authenticateUser,
   validate({ schema: getEventSchema, source: 'params' }),
-  upload.array('photos', 1000),
+  upload.array('photos', MAX_EVENT_PHOTOS),
   uploadEventPhotoBatch,
 );
 router.patch(

@@ -24,7 +24,8 @@ import {
 } from '../lib/photo-upload';
 
 const acceptedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-const maxFileBytes = 20 * 1024 * 1024;
+const maxFileBytes = 50 * 1024 * 1024;
+const maxEventPhotos = 5000;
 
 type UploadSession = {
   eventId: string;
@@ -64,10 +65,10 @@ export function CreateEventPage() {
     const valid = incoming.filter(
       (file) => acceptedTypes.includes(file.type) && file.size <= maxFileBytes,
     );
-    setFiles((current) => [...current, ...valid].slice(0, 1000));
+    setFiles((current) => [...current, ...valid].slice(0, maxEventPhotos));
     if (valid.length !== incoming.length) {
       setError(
-        'Some files were skipped. Use JPG, PNG, or WEBP images under 20 MB.',
+        'Some files were skipped. Use JPG, PNG, or WEBP images under 50 MB.',
       );
     }
   };
@@ -154,7 +155,7 @@ export function CreateEventPage() {
           <div className="form-section-body">
             <div className="form-label">
               Event photographs
-              <span>{files.length ? `${files.length} selected` : 'JPG, PNG or WEBP · max 20 MB each'}</span>
+              <span>{files.length ? `${files.length} selected` : 'JPG, PNG or WEBP · max 50 MB each'}</span>
             </div>
             <div
               className={`dropzone${dragging ? ' is-dragging' : ''}${uploadLocked ? ' is-disabled' : ''}`}

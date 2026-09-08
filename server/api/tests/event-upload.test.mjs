@@ -7,6 +7,7 @@ import {
   getPhotoBatchBytes,
   getPhotoDeletionCounterChanges,
   isPhotoBatchWithinLimit,
+  MAX_EVENT_PHOTOS,
   MAX_PHOTO_BATCH_BYTES,
 } from '../dist/modules/events/event-upload.util.js';
 import {
@@ -24,6 +25,10 @@ test('validates the metadata-only create-event contract', () => {
   );
   assert.equal(
     createEventSchema.safeParse({ name: 'Empty', expectedTotalPhotos: 0 }).success,
+    false,
+  );
+  assert.equal(
+    createEventSchema.safeParse({ name: 'Too many', expectedTotalPhotos: MAX_EVENT_PHOTOS + 1 }).success,
     false,
   );
 });
@@ -92,6 +97,18 @@ test('later batches increase both actual total and received counters', () => {
       totalPhotos: 525,
       receivedPhotos: 525,
     },
+  );
+});
+
+test('prevents additional batches from exceeding the event photo limit', () => {
+  assert.throws(
+    () =>
+      getBatchAcceptancePlan({
+        totalPhotos: MAX_EVENT_PHOTOS - 1,
+        receivedPhotos: MAX_EVENT_PHOTOS - 1,
+        batchPhotoCount: 2,
+      }),
+    /cannot contain more than/,
   );
 });
 

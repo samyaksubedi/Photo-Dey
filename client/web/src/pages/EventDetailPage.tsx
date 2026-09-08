@@ -133,11 +133,11 @@ export function EventDetailPage() {
       .filter(
         (file) =>
           ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type) &&
-          file.size <= 20 * 1024 * 1024,
+          file.size <= 50 * 1024 * 1024,
       )
-      .slice(0, 1000);
+      .slice(0, 5000);
     if (!valid.length) {
-      setAddError('Choose JPG, PNG, or WEBP images under 20 MB.');
+      setAddError('Choose JPG, PNG, or WEBP images under 50 MB.');
       return;
     }
     if (valid.length !== incoming.length) {

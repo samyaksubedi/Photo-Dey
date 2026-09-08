@@ -1,5 +1,5 @@
 export const MAX_PHOTO_BATCH_BYTES = 80 * 1024 * 1024;
-export const MAX_EVENT_PHOTOS = 1000;
+export const MAX_EVENT_PHOTOS = 5000;
 
 export const getPhotoBatchBytes = (files: Array<{ size: number }>) =>
   files.reduce((total, file) => total + file.size, 0);
@@ -21,9 +21,14 @@ export const getBatchAcceptancePlan = (data: {
     );
   }
 
+  const totalPhotos = data.totalPhotos + (isInitialUpload ? 0 : data.batchPhotoCount);
+  if (totalPhotos > MAX_EVENT_PHOTOS) {
+    throw new RangeError(`An event cannot contain more than ${MAX_EVENT_PHOTOS} photos`);
+  }
+
   return {
     isInitialUpload,
-    totalPhotos: data.totalPhotos + (isInitialUpload ? 0 : data.batchPhotoCount),
+    totalPhotos,
     receivedPhotos: data.receivedPhotos + data.batchPhotoCount,
   };
 };
