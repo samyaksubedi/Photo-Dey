@@ -308,3 +308,117 @@ server/
 - **ChatGPT and Claude:** I have used then as development assistants while building frontend components, learning unfamiliar backend concepts, debugging, and organizing parts of the project documentation and mainly creating and building test files in ai/ . 
 - **In ReadMe:** I have used AI(CODEX) to create Server Architecture . 
 
+
+## Local Setup
+
+### Prerequisites
+
+- Node.js **22+** and npm
+- Python **3.11+** and [uv](https://docs.astral.sh/uv/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (with Docker Compose)
+- A Cloudinary account, a Gmail account with 2-Step Verification enabled, and a Telegram bot
+
+### 1. Start the local services
+
+From the project root, start PostgreSQL, Redis, and Qdrant:
+
+```bash
+docker compose up -d
+```
+
+This uses PostgreSQL on `localhost:5433`, Redis on `localhost:6379`, and Qdrant on `localhost:6333`.
+
+### 2. Backend API
+
+Open a terminal:
+
+```bash
+cd server/api
+cp .env.example .env
+npm ci
+npx prisma migrate dev
+npm run dev
+```
+
+Open two more terminals in `server/api` for the Node background workers:
+
+```bash
+npm run worker:upload
+```
+
+```bash
+npm run worker:email
+```
+
+### 3. AI workers
+
+Open a terminal:
+
+```bash
+cd server/ai
+cp .env.example .env
+uv sync
+```
+
+Then run these in **three separate terminals** from `server/ai`:
+
+```bash
+uv run python -m app.workers.ai_worker
+```
+
+```bash
+uv run python -m app.workers.search_worker
+```
+
+```bash
+uv run python -m app.workers.cleanup_worker
+```
+
+The API also has `worker:ai` and `worker:search` scripts, but those are only test workers. The real AI and search workers are the Python ones above : )
+
+### 4. Frontend
+
+Open another terminal:
+
+```bash
+cd client/web
+cp .env.example .env
+npm ci
+npm run dev
+```
+
+Open the Vite URL shown in the terminal (normally `http://localhost:5173`).
+
+### Environment variables
+
+Copy every `.env.example` file to a `.env` file and fill in **every required value** before starting the app. Do not commit these files.
+
+- In `server/api/.env`, set the local service values like this:
+
+```env
+NODE_ENV=development
+PORT=3000
+CLIENT_URL=http://localhost:5173
+SERVER_URL=http://localhost:3000
+DATABASE_URL=postgresql://photodey:photodey123@localhost:5433/photodey_dev?schema=public
+REDIS_URL=redis://:photodeyredis123@localhost:6379
+QDRANT_URL=http://localhost:6333
+QDRANT_API_KEY=photodey_qdrant_key
+```
+
+  Generate long random values for `ACCESS_TOKEN_SECRET`, `AI_WEBHOOK_SECRET`, `TELEGRAM_WEBHOOK_SECRET`, and `MASTER_ACCESS_KEY`. `AI_WEBHOOK_SECRET` must be the same value in both `server/api/.env` and `server/ai/.env`.
+
+- In `server/ai/.env`, the example values already point to local Docker. Only make sure `NODE_API_URL=http://localhost:3000` and `AI_WEBHOOK_SECRET` matches the API value.
+- In `client/web/.env`, use `VITE_API_BASE_URL=http://localhost:3000/api/v1`.
+
+#### External credentials
+
+- **Cloudinary:** Create a free account at [Cloudinary](https://cloudinary.com/), open your dashboard, then go to **API Keys**. Copy the cloud name, API key, and API secret into `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
+- **Gmail:** This app uses Gmail SMTP through Nodemailer - you do **not** need to create a Google Cloud / Gmail API project. Go to your [Google Account security page](https://myaccount.google.com/security), enable **2-Step Verification**, then open [App passwords](https://myaccount.google.com/apppasswords). Create one (name it `PhotoDey`), copy the generated 16-character password into `GMAIL_APP_PASSWORD`, and use that Gmail address as `GMAIL_USER`.
+- **Telegram:** Open [@BotFather](https://t.me/BotFather) in Telegram, send `/newbot`, choose a display name and username, then copy the token it gives you into `TELEGRAM_BOT_TOKEN`. Put the bot username in `TELEGRAM_BOT_USERNAME` (with or without `@` is fine). Use a random value for `TELEGRAM_WEBHOOK_SECRET`.
+
+> For the Telegram webhook to receive real messages locally, expose your API through an HTTPS tunnel such as ngrok or Cloudflare Tunnel. Set `SERVER_URL` to that public HTTPS URL, then register the webhook (replace the placeholders):
+>
+> ```bash
+> curl.exe -X POST "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook" -d "url=https://<your-public-url>/api/v1/telegram/webhook" -d "secret_token=<TELEGRAM_WEBHOOK_SECRET>"
+> ```
