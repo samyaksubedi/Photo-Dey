@@ -1,7 +1,10 @@
 .venv
+.venv-runtime
+.uv-runtime-*
 .pytest_cache
 __pycache__
 *.pyc
 .env
 models
 tests
+.git

@@ -148,9 +148,9 @@ CLIENT_URL=http://localhost:5173
 SERVER_URL=http://localhost:3000
 DATABASE_URL=postgresql://photodey:photodey123@localhost:5433/photodey_dev?schema=public
 REDIS_URL=redis://:photodeyredis123@localhost:6379
-QDRANT_URL=http://localhost:6333
-QDRANT_API_KEY=photodey_qdrant_key
 ```
+
+The Qdrant settings belong only in `server/ai/.env`; the Node API does not use them.
 
 Next, insert the necessary secrets and third party credentials as specified in the example file, ensuring that the value of `AI_WEBHOOK_SECRET` is the same in both `server/api/.env` and `server/ai/.env`. In `client/web/.env`, use:
 
@@ -222,6 +222,13 @@ npm run build
 ```
 
 The production assets are created in `client/web/dist`.
+
+## Deploying
+
+Backend on your own VPS with Coolify, web app on Vercel:
+
+1. API, workers, databases and AI workers: [coolify.md](coolify.md)
+2. Web app: [vercel.md](vercel.md)
 
 ## Running tests
 
