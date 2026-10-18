@@ -12,32 +12,29 @@ const handleStart = async (data: { chatId: string; publicCode?: string }) => {
   if (!data.publicCode) {
     return sendMessage({
       chatId: data.chatId,
-      text: `📸 Welcome to PhotoDey!
+      text: `Welcome to PhotoDey.
 
-Please open the bot using an event invitation link.
+Open this bot from an event invitation link to find your photos.
 
-Commands:
-/help - Show help
-/archive - View your previous galleries`,
+/help shows how it works.
+/archive lists your earlier galleries.`,
     });
   }
   const event = await eventRepository.findByPublicCode(data.publicCode);
   if (!event) {
     return sendMessage({
       chatId: data.chatId,
-      text: `🎉 Welcome to PhotoDey!
+      text: `We couldn't find this event.
 
-Sorry your event can't be found.
-
-Please contact to your event manager.`,
+The link may be wrong. Ask the event organizer for a new one.`,
     });
   }
   if (!event.publicEnabled) {
     return sendMessage({
       chatId: data.chatId,
-      text: `This event is no longer accepting photo searches.
+      text: `This event isn't accepting photo searches any more.
 
-Please contact the event organizer.`,
+Ask the event organizer if you think this is a mistake.`,
     });
   }
   if (!isEventPubliclySearchable(event)) {
@@ -48,10 +45,10 @@ Please contact the event organizer.`,
       text: isProcessing
         ? `The photos for ${event.name} are still being prepared.
 
-Please try again shortly.`
-        : `Photo search is unavailable for ${event.name}.
+Try again in a few minutes.`
+        : `Photo search isn't available for ${event.name} right now.
 
-Please contact the event organizer.`,
+Ask the event organizer.`,
     });
   }
   const telegramSession = await telegramSessionRepository.findByChatId(
@@ -73,26 +70,24 @@ Please contact the event organizer.`,
 
   return sendMessage({
     chatId: data.chatId,
-    text: `🎉 Welcome to PhotoDey!
+    text: `You're connected to ${event.name}.
 
-${event.name} has been connected successfully.
-
-Now send me a selfie and I'll find your photos from this event.`,
+Send me one clear, front-facing selfie and I'll find the photos you're in.`,
   });
 };
 const handleHelp = async (data: { chatId: string }) => {
   return sendMessage({
     chatId: data.chatId,
-    text: `📖 Available Commands
+    text: `How to find your photos
 
-/start - Start PhotoDey
-/archive - View your previous galleries
-/help - Show this help message
+1. Open this bot from the event's QR code or link.
+2. Send one clear, front-facing selfie.
+3. Open the gallery link I send back.
 
-To find photos:
-1. Open the bot from an event link
-2. Send a selfie
-3. Receive your gallery link`,
+Commands
+/start - Start again
+/archive - Your earlier galleries
+/help - Show this message`,
   });
 };
 const handleArchive = async (data: { chatId: string }) => {
@@ -102,9 +97,9 @@ const handleArchive = async (data: { chatId: string }) => {
   if (!completedSearchRequests.length) {
     return sendMessage({
       chatId: data.chatId,
-      text: `📂 Your Gallery Archive
+      text: `You don't have any galleries yet.
 
-You don't have any completed galleries yet.`,
+Open an event link and send a selfie to create one.`,
     });
   }
 
@@ -119,13 +114,11 @@ You don't have any completed galleries yet.`,
 
   return sendMessage({
     chatId: data.chatId,
-    text: `📂 Your Gallery Archive
+    text: `Your galleries
 
-Here are all your previous galleries.
+${galleries}
 
-Tap any link below to open it.
-
-${galleries}`,
+Tap a link to open it.`,
   });
 };
 const handleSelfieUpload = async (data: {
@@ -149,9 +142,9 @@ const handleSelfieUpload = async (data: {
   if (!event.publicEnabled) {
     return sendMessage({
       chatId: data.chatId,
-      text: `This event is no longer accepting photo searches.
+      text: `This event isn't accepting photo searches any more.
 
-Please contact the event organizer.`,
+Ask the event organizer if you think this is a mistake.`,
     });
   }
   if (!isEventPubliclySearchable(event)) {
@@ -162,8 +155,8 @@ Please contact the event organizer.`,
       text: isProcessing
         ? `The event photos are still being prepared.
 
-Please try again shortly.`
-        : 'Photo search is unavailable for this event.',
+Try again in a few minutes.`
+        : "Photo search isn't available for this event right now.",
     });
   }
   const largestPhoto = data.photo?.at(-1)!;
@@ -192,9 +185,9 @@ Please try again shortly.`
 const handleUnknownCommand = async (data: { chatId: string }) => {
   sendMessage({
     chatId: data.chatId,
-    text: `❓ Unknown command.
+    text: `I don't know that command.
 
-Use /help to see available commands.`,
+Send /help to see what I can do.`,
   });
 };
 

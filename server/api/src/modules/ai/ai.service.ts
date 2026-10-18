@@ -125,9 +125,7 @@ const handleSearchStatusChanged = async (
 
     await sendMessage({
       chatId: searchRequest.chatId,
-      text: `📸 Selfie received!
-
-We're searching through the event photos.
+      text: `Selfie received. I'm searching the event photos now.
 
 This usually takes less than a minute.`,
     });
@@ -142,15 +140,11 @@ This usually takes less than a minute.`,
 
     await sendMessage({
       chatId: searchRequest.chatId,
-      text: `❌ We couldn't process your selfie.
+      text: `We couldn't process your selfie.
 
-This seems to be a temporary issue.
+This is usually temporary. Send your selfie again in a few minutes.
 
-Please upload your selfie again in a few minutes.
-
-If the problem continues, contact the event organizer.
-
-We apologize for the inconvenience.`,
+If it keeps failing, contact the event organizer.`,
     });
 
     return;
@@ -194,6 +188,7 @@ We apologize for the inconvenience.`,
       matchCount,
       galleryLink: GALLERY_LINK,
     }),
+    button: { text: 'Open my gallery', url: GALLERY_LINK },
   });
 };
 export const aiServices = {

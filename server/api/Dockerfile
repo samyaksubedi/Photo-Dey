@@ -10,7 +10,9 @@ RUN apt-get update \
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+# --include=dev: Coolify passes NODE_ENV=production into the build, which would otherwise skip the
+# TypeScript and Prisma tooling this build needs.
+RUN npm ci --include=dev
 COPY . .
 
 # prisma.config.ts insists on DATABASE_URL even for `prisma generate`, which never connects.

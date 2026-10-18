@@ -11,10 +11,26 @@ const telegramFileApi = axios.create({
   timeout: 10000,
 });
 
-export const sendMessage = async (data: { chatId: string; text: string }) => {
+type SendMessageInput = {
+  chatId: string;
+  text: string;
+  // Telegram only accepts public https links in buttons, so we skip the
+  // button (and rely on the link in the text) for local http URLs.
+  button?: { text: string; url: string };
+};
+
+export const sendMessage = async (data: SendMessageInput) => {
+  const canShowButton = Boolean(data.button?.url.startsWith('https://'));
   return telegramApi.post('/sendMessage', {
     chat_id: data.chatId,
     text: data.text,
+    ...(canShowButton && data.button
+      ? {
+          reply_markup: {
+            inline_keyboard: [[{ text: data.button.text, url: data.button.url }]],
+          },
+        }
+      : {}),
   });
 };
 

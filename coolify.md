@@ -100,7 +100,6 @@ Qdrant stores the face vectors. It is not in Coolify's database list, so deploy 
    services:
      qdrant:
        image: qdrant/qdrant:latest
-       container_name: photodey-qdrant
        restart: unless-stopped
        environment:
          - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY}
@@ -113,7 +112,7 @@ Qdrant stores the face vectors. It is not in Coolify's database list, so deploy 
 3. Add the environment variable `QDRANT_API_KEY` (the value you generated in step 0).
 4. In the resource's **Advanced** settings, turn on **Connect To Predefined Network**. Without it the other
    resources cannot see Qdrant. Do not add a domain. Deploy.
-5. The internal address for the other resources is now `http://photodey-qdrant:6333`. This is `QDRANT_URL` below.
+5. Coolify renames the container to `qdrant-<service id>` (the id is the last part of the service's URL in your browser, for example `qdrant-8bbyktg9b46jvs22aqyu9cft`). The internal address for the other resources is `http://qdrant-<service id>:6333`. This is `QDRANT_URL` below. Test it from any app's Terminal: opening that address without a key must answer `401 Must provide an API key`.
    Once it works, replace `latest` with the exact version that Qdrant logs on start, so a future upgrade is your choice.
 
 > The Python client prints a warning about sending an API key over `http`. That is expected on the private
@@ -150,7 +149,7 @@ You'll reuse this same block for the upload and email workers.
 | Variable                  | Production value                                                              |
 | ------------------------- | ----------------------------------------------------------------------------- |
 | `PROCESS`                 | `api`                                                                         |
-| `NODE_ENV`                | `production`                                                                  |
+| `NODE_ENV`                | `production`. In Coolify set it to **Not available during build**, or the build skips the dev packages TypeScript needs. |
 | `PORT`                    | `3000`                                                                        |
 | `CLIENT_URL`              | `https://photodey.com` (exactly what the browser shows: no trailing slash, and not `www`, see [vercel.md](vercel.md)) |
 | `SERVER_URL`              | `https://api.photodey.com`                                                    |
@@ -219,7 +218,7 @@ Environment variables (identical for all three except `WORKER`):
 | -------------------- | ------------------------------------------------------------------- |
 | `WORKER`             | `ai`, `search` or `cleanup`                                         |
 | `REDIS_URL`          | The same internal URL as the API                                    |
-| `QDRANT_URL`         | `http://photodey-qdrant:6333`                                       |
+| `QDRANT_URL`         | `http://qdrant-<service id>:6333`                                       |
 | `QDRANT_API_KEY`     | The Qdrant key from step 3                                          |
 | `QDRANT_COLLECTION`  | `photo_faces_v1`                                                    |
 | `NODE_API_URL`       | `https://api.photodey.com` (host only, **no** `/api/v1` and no trailing slash) |
@@ -274,7 +273,7 @@ node scripts/promote-admin.mjs you@example.com
 ## 10. Check it
 
 - `https://api.photodey.com/` returns `{"status":"Healthy"}`.
-- In the `photodey-api` Terminal, `getent hosts photodey-qdrant` prints an address (Qdrant is reachable).
+- In the `photodey-api` Terminal, fetching `http://qdrant-<service id>:6333/collections` answers `401` (Qdrant is reachable and its key is enforced).
 - The logs of `photodey-ai`, `photodey-search`, `photodey-cleanup`, `photodey-upload` and `photodey-email` each show a
   started message and no repeating errors.
 - On the live site: register, receive the verification email, log in, **reload the page** (you should stay logged in).

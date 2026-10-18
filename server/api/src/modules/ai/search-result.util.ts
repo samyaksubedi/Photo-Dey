@@ -10,20 +10,19 @@ export const buildSearchCompletionMessage = ({
   galleryLink,
 }: SearchCompletionMessageInput) => {
   if (!hasSearchMatches(matchCount)) {
-    return `🔍 We couldn't find any matching photos.
+    return `We couldn't find any matching photos.
 
-Try again with a clear, front-facing selfie in good lighting.
+Try again with a clear, front-facing selfie in good light.
 
-If the event photos are still being uploaded, you can also try again later.`;
+If the event photos are still being uploaded, try again a little later.`;
   }
 
   if (!galleryLink) {
     throw new Error('Gallery link is required when search matches exist');
   }
 
-  return `🎉 Your gallery is ready!
+  return `We found ${matchCount} matching photo${matchCount === 1 ? '' : 's'} of you.
 
-We found ${matchCount} matching photo${matchCount === 1 ? '' : 's'}.
-
-📂 ${galleryLink}`;
+Your private gallery:
+${galleryLink}`;
 };
