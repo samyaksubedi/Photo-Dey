@@ -26,6 +26,7 @@ export function LandingPage() {
           <a href="#how-it-works">How it works</a>
           <a href="#for-organizers">For organizers</a>
           <a href="#privacy">Privacy</a>
+          <a href="#faq">FAQ</a>
         </div>
         <div className="nav-actions">
           {!loading && user ? <Link className="text-link" to="/dashboard/account">Account</Link> : !loading ? <Link className="text-link" to="/sign-in">Sign in</Link> : null}
@@ -38,8 +39,9 @@ export function LandingPage() {
           <p className="eyebrow"><span /> Private photo discovery for every event</p>
           <h1>Every moment<br />you were <em>in.</em></h1>
           <p className="hero-lede">
-            PhotoDey finds the photographs that matter to each guest—without
-            making anyone scroll through hundreds that don’t.
+            Every guest gets the photographs they appear in, from weddings
+            and family ceremonies to concerts and college fests, without
+            scrolling through hundreds that aren’t theirs.
           </p>
           <div className="hero-actions">
             <Link className="button button-accent" to={workspacePath}>
@@ -48,7 +50,7 @@ export function LandingPage() {
             <a className="button button-quiet" href="#how-it-works">See how it works</a>
           </div>
           <div className="hero-notes" aria-label="Product highlights">
-            <span>No app for guests</span>
+            <span>Guests use Telegram</span>
             <span>One selfie</span>
             <span>Private by event</span>
           </div>
@@ -150,8 +152,34 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section className="section faq-section container" id="faq">
+        <h2>Questions organizers ask first</h2>
+        <div className="faq-list">
+          <details>
+            <summary>Do guests need an account?</summary>
+            <p>No. Guests scan the QR code, open the PhotoDey bot in Telegram, and send one selfie. They need Telegram on their phone, nothing else.</p>
+          </details>
+          <details>
+            <summary>When can guests start searching?</summary>
+            <p>Once your photos finish processing. The event page shows live progress, and the QR code becomes shareable when it is done.</p>
+          </details>
+          <details>
+            <summary>Can I stop guests from searching?</summary>
+            <p>Yes. Turn off public access on the event at any time and new searches stop, even for guests who already have the QR code.</p>
+          </details>
+          <details>
+            <summary>How many photos can one event hold?</summary>
+            <p>Up to 5,000 photographs per event, uploaded in batches.</p>
+          </details>
+          <details>
+            <summary>What if a guest isn’t found?</summary>
+            <p>The bot asks them to try again with a clear, front-facing selfie in good light. Photos that are still uploading can be searched later.</p>
+          </details>
+        </div>
+      </section>
+
       <section className="final-cta container">
-        <p className="section-kicker">Your moments, our focus.</p>
+        <p className="section-kicker">Start with one event</p>
         <h2>Make every guest part<br />of the gallery.</h2>
         <Link className="button button-accent" to={workspacePath}>{workspaceLabel} <ArrowUpRight size={17} /></Link>
       </section>
