@@ -6,19 +6,18 @@ export function PageLoader({ label = 'Loading' }: { label?: string }) {
 }
 
 export function EmptyState({
-  eyebrow,
   title,
   body,
   action,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   body: string;
   action?: ReactNode;
 }) {
   return (
     <div className="empty-state">
-      <span className="mini-label">{eyebrow}</span>
+      <img src="/logo-mark.png" alt="" width="64" height="64" />
       <h2>{title}</h2>
       <p>{body}</p>
       {action}
