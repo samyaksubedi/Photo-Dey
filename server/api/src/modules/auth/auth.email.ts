@@ -1,298 +1,126 @@
 import { envVariables } from '../../configs/env.config.js';
 import { sendEmail } from '../../utils/email.util.js';
 
-type GetEmailShellInput = {
-  name: string;
-  verificationUrl: string;
-  headline: string;
-  introParagraph: string;
+const BRAND = {
+  maroon: '#902338',
+  marigold: '#EDA93E',
+  cream: '#F6F3ED',
+  ink: '#1B1A17',
+  muted: '#5C574D',
+  faint: '#6B665A',
+  line: '#E3DCCD',
+  soft: '#FBF9F4',
 };
 
-const getEmailShell = (data: GetEmailShellInput) => ({
-  html: `
-<!DOCTYPE html>
+const FONT =
+  "'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif";
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+type EmailContent = {
+  preheader: string;
+  headline: string;
+  paragraphs: string[];
+  ctaLabel: string;
+  ctaUrl: string;
+  fallbackLabel: string;
+  note: string;
+};
+
+const renderEmail = (content: EmailContent) => {
+  const logoUrl = `${envVariables.CLIENT_URL}/email-logo.png`;
+  const supportEmail = envVariables.GMAIL_USER;
+  const url = escapeHtml(content.ctaUrl);
+
+  const paragraphs = content.paragraphs
+    .map(
+      (text) =>
+        `<p style="margin:0 0 16px;font-family:${FONT};font-size:16px;line-height:1.65;color:${BRAND.muted};">${escapeHtml(text)}</p>`,
+    )
+    .join('');
+
+  const html = `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta name="color-scheme" content="light" />
     <title>PhotoDey</title>
-
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: 'Segoe UI', Arial, sans-serif;
-        background-color: #f8fafc;
-        color: #0f172a;
-      }
-
-      .wrapper {
-        max-width: 580px;
-        margin: 40px auto;
-        background: #ffffff;
-        border-radius: 18px;
-        overflow: hidden;
-        border: 1px solid #e2e8f0;
-      }
-
-      .header {
-        background: #0f172a;
-        padding: 36px 40px;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-      }
-
-      .header-logo {
-        width: 44px;
-        height: 44px;
-        background: #2563eb;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-      }
-
-      .header h1 {
-        color: #ffffff;
-        font-size: 24px;
-        font-weight: 700;
-      }
-
-      .header p {
-        color: #cbd5e1;
-        font-size: 13px;
-        margin-top: 2px;
-      }
-
-      .body {
-        padding: 40px;
-      }
-
-      .body h2 {
-        font-size: 22px;
-        color: #0f172a;
-        margin-bottom: 14px;
-      }
-
-      .body p {
-        font-size: 15px;
-        line-height: 1.8;
-        color: #475569;
-        margin-bottom: 16px;
-      }
-
-      .feature-box {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 18px;
-        margin: 24px 0;
-      }
-
-      .feature-box ul {
-        margin: 0;
-        padding-left: 18px;
-      }
-
-      .feature-box li {
-        color: #475569;
-        margin-bottom: 8px;
-        font-size: 14px;
-      }
-
-      .verify-box {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        border-radius: 14px;
-        padding: 28px;
-        text-align: center;
-        margin: 28px 0;
-      }
-
-      .verify-box p {
-        color: #334155;
-        margin-bottom: 20px;
-      }
-
-      .cta-btn {
-        display: inline-block;
-        padding: 14px 36px;
-        background: #2563eb;
-        color: #ffffff !important;
-        text-decoration: none;
-        border-radius: 10px;
-        font-size: 15px;
-        font-weight: 600;
-      }
-
-      .fallback {
-        margin-top: 18px;
-        font-size: 12px;
-        color: #64748b;
-      }
-
-      .fallback a {
-        color: #2563eb;
-        word-break: break-all;
-        text-decoration: none;
-      }
-
-      .divider {
-        border: none;
-        border-top: 1px solid #e2e8f0;
-        margin: 28px 0;
-      }
-
-      .notice {
-        font-size: 13px;
-        color: #64748b;
-        line-height: 1.7;
-      }
-
-      .notice a {
-        color: #2563eb;
-        text-decoration: none;
-      }
-
-      .footer {
-        background: #f8fafc;
-        padding: 20px 40px;
-        border-top: 1px solid #e2e8f0;
-      }
-
-      .footer p {
-        font-size: 12px;
-        color: #94a3b8;
-        text-align: center;
-        line-height: 1.8;
-      }
-
-      .footer a {
-        color: #2563eb;
-        text-decoration: none;
-      }
-    </style>
   </head>
-
-  <body>
-    <div class="wrapper">
-      <div class="header">
-        <div class="header-logo">📸</div>
-
-        <div>
-          <h1>PhotoDey</h1>
-          <p>Find your moments.</p>
-        </div>
-      </div>
-
-      <div class="body">
-        <h2>${data.headline}</h2>
-
-        <p>${data.introParagraph}</p>
-
-        <div class="feature-box">
-          <ul>
-            <li>Upload a selfie and find your photos instantly.</li>
-            <li>Access photos from supported events.</li>
-            <li>Download and share your favorite memories.</li>
-          </ul>
-        </div>
-
-        <div class="verify-box">
-          <p>
-            Verify your email to activate your account and start accessing
-            your event galleries.
+  <body style="margin:0;padding:0;background:${BRAND.cream};">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(content.preheader)}</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BRAND.cream};">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;background:#ffffff;border:1px solid ${BRAND.line};border-radius:20px;overflow:hidden;">
+            <tr>
+              <td style="padding:22px 32px;border-bottom:4px solid ${BRAND.marigold};">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td><img src="${logoUrl}" width="44" height="44" alt="" style="display:block;border:0;width:44px;height:44px;" /></td>
+                    <td style="padding-left:12px;font-family:${FONT};font-size:22px;font-weight:800;letter-spacing:-0.5px;color:${BRAND.ink};">PhotoDey</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:36px 32px 12px;">
+                <h1 style="margin:0 0 16px;font-family:${FONT};font-size:28px;line-height:1.2;font-weight:800;color:${BRAND.ink};">${escapeHtml(content.headline)}</h1>
+                ${paragraphs}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 32px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="background:${BRAND.maroon};border-radius:999px;">
+                      <a href="${url}" style="display:inline-block;padding:15px 32px;font-family:${FONT};font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;">${escapeHtml(content.ctaLabel)}</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 32px 32px;">
+                <p style="margin:0;font-family:${FONT};font-size:13px;line-height:1.6;color:${BRAND.faint};">${escapeHtml(content.fallbackLabel)}<br /><a href="${url}" style="color:${BRAND.maroon};word-break:break-all;">${url}</a></p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 32px;background:${BRAND.soft};border-top:1px solid ${BRAND.line};">
+                <p style="margin:0;font-family:${FONT};font-size:13px;line-height:1.7;color:${BRAND.faint};">${escapeHtml(content.note)} Questions? Write to <a href="mailto:${escapeHtml(supportEmail)}" style="color:${BRAND.maroon};">${escapeHtml(supportEmail)}</a>.</p>
+              </td>
+            </tr>
+          </table>
+          <p style="margin:20px 0 0;font-family:${FONT};font-size:12px;line-height:1.7;color:${BRAND.faint};text-align:center;">
+            PhotoDey, find every moment you were in.<br />
+            <a href="${envVariables.CLIENT_URL}/privacy" style="color:${BRAND.faint};">Privacy</a> &nbsp;|&nbsp; <a href="${envVariables.CLIENT_URL}" style="color:${BRAND.faint};">photodey.com</a>
           </p>
-
-          <a
-            href="${data.verificationUrl}"
-            class="cta-btn"
-          >
-            Verify Email
-          </a>
-
-          <div class="fallback">
-            Button not working? Copy and paste this link:
-            <br /><br />
-
-            <a href="${data.verificationUrl}">
-              ${data.verificationUrl}
-            </a>
-          </div>
-        </div>
-
-        <hr class="divider" />
-
-        <p class="notice">
-          Didn't create a PhotoDey account? You can safely ignore this email.
-          <br />
-          Questions? Contact us at
-          <a href="mailto:${envVariables.GMAIL_USER}">
-            ${envVariables.GMAIL_USER}
-          </a>
-        </p>
-
-        <p
-          class="notice"
-          style="margin-top: 12px;"
-        >
-          The PhotoDey Team
-        </p>
-      </div>
-
-      <div class="footer">
-        <p>
-          You're receiving this email because a PhotoDey account was created
-          using this email address.
-          <br />
-
-          <a href="${envVariables.CLIENT_URL}/privacy">
-            Privacy Policy
-          </a>
-
-          &nbsp;·&nbsp;
-
-          <a href="${envVariables.CLIENT_URL}">
-            PhotoDey
-          </a>
-        </p>
-      </div>
-    </div>
+        </td>
+      </tr>
+    </table>
   </body>
-</html>
-`,
+</html>`;
 
-  text: `
-Hi ${data.name},
+  const text = `${content.headline}
 
-Welcome to PhotoDey.
+${content.paragraphs.join('\n\n')}
 
-Verify your account here:
+${content.ctaLabel}: ${content.ctaUrl}
 
-${data.verificationUrl}
+${content.note}
+Questions? Write to ${supportEmail}.
 
-PhotoDey helps you:
+PhotoDey, find every moment you were in.`;
 
-• Upload a selfie and find your photos instantly
-• Access event galleries
-• Download and share your memories
-
-This verification link expires in 24 hours.
-
-If you didn't create a PhotoDey account, you can safely ignore this email.
-
-— The PhotoDey Team
-`,
-});
+  return { html, text };
+};
 
 type SendWelcomeEmailInput = {
   to: string;
@@ -303,17 +131,22 @@ type SendWelcomeEmailInput = {
 const sendWelcomeEmail = async (data: SendWelcomeEmailInput) => {
   const verificationUrl = `${envVariables.CLIENT_URL}/auth/verify/${data.emailVerificationToken}`;
 
-  const { html, text } = getEmailShell({
-    name: data.name,
-    verificationUrl,
-    headline: `Welcome to PhotoDey, ${data.name}! 📸`,
-    introParagraph:
-      'Thanks for joining PhotoDey. Verify your email address to activate your account and start finding your photos from events in seconds.',
+  const { html, text } = renderEmail({
+    preheader: 'Confirm your email to start creating events.',
+    headline: `Welcome to PhotoDey, ${data.name}`,
+    paragraphs: [
+      'Confirm your email address to activate your account.',
+      'After that, upload your event photos once and share one QR code. Every guest can then find the photos they appear in.',
+    ],
+    ctaLabel: 'Verify email',
+    ctaUrl: verificationUrl,
+    fallbackLabel: 'Button not working? Paste this link into your browser:',
+    note: "This link works for 24 hours. If you didn't create a PhotoDey account, you can ignore this email.",
   });
 
   return sendEmail({
     to: data.to,
-    subject: 'Welcome to PhotoDey — Verify Your Email',
+    subject: 'Verify your email to start using PhotoDey',
     html,
     text,
   });
@@ -324,20 +157,24 @@ type ResendVerificationEmailInput = SendWelcomeEmailInput;
 const resendVerificationEmail = async (data: ResendVerificationEmailInput) => {
   const verificationUrl = `${envVariables.CLIENT_URL}/auth/verify/${data.emailVerificationToken}`;
 
-  const { html, text } = getEmailShell({
-    name: data.name,
-    verificationUrl,
-    headline: 'Your new verification link is ready',
-    introParagraph:
-      'We received a request for a new verification email. Use the link below to activate your PhotoDey account and continue finding your event photos.',
+  const { html, text } = renderEmail({
+    preheader: 'Your new verification link is ready.',
+    headline: 'Here is your new verification link',
+    paragraphs: [
+      'You asked for a new link. Use it to activate your PhotoDey account and start creating events.',
+    ],
+    ctaLabel: 'Verify email',
+    ctaUrl: verificationUrl,
+    fallbackLabel: 'Button not working? Paste this link into your browser:',
+    note: "This link works for 24 hours and replaces any earlier link. If you didn't ask for it, you can ignore this email.",
   });
 
   return sendEmail({
     to: data.to,
-    subject: 'PhotoDey — New Verification Email',
+    subject: 'Your new PhotoDey verification link',
     html,
     text,
   });
 };
 
-export { sendWelcomeEmail, resendVerificationEmail };
+export { sendWelcomeEmail, resendVerificationEmail, renderEmail };
