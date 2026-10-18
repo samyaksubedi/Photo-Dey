@@ -3,7 +3,8 @@ import { ArrowUpRight, Clock3, Lock, MessageCircle, ScanFace } from 'lucide-reac
 import { Link, useParams } from 'react-router-dom';
 import { Brand } from '../components/Brand';
 import { EmptyState, PageLoader } from '../components/PageState';
-import { Scene, coverKind } from '../components/Scene';
+import { Photo } from '../components/Photo';
+import { coverKind, coverPhoto } from '../lib/photos';
 import { ApiClientError, apiRequest } from '../lib/api';
 import type { PublicEvent } from '../types';
 
@@ -38,10 +39,7 @@ export function PublicEventPage() {
       <header className="guest-top"><Brand /></header>
       <section className="guest-card">
         <div className="guest-cover">
-          <Scene
-            kind={kind}
-            matches={kind === 'wedding' ? [{ x: 138, y: 112, w: 64, h: 76, hot: true }, { x: 206, y: 108, w: 64, h: 80 }] : undefined}
-          />
+          <Photo id={coverPhoto(kind)} width={900} eager />
           <div className="guest-cover-text">
             <span className="guest-badge"><ScanFace size={15} />Photo search is on</span>
             <h1>{event.name}</h1>

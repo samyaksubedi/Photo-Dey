@@ -2,7 +2,8 @@ import { ArrowLeft, ArrowRight, CheckCircle2, LoaderCircle, Mail, Send } from 'l
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Brand } from '../components/Brand';
-import { Scene } from '../components/Scene';
+import { Photo } from '../components/Photo';
+import { PHOTO } from '../lib/photos';
 import { useAuth } from '../context/AuthContext';
 import { ApiClientError, apiRequest } from '../lib/api';
 
@@ -19,9 +20,9 @@ function AuthShell({ children, asideTitle, asideCopy }: { children: ReactNode; a
       </section>
       <aside className="auth-aside">
         <div className="auth-collage" aria-hidden="true">
-          <div className="auth-tile auth-tile-a"><Scene kind="wedding" matches={[{ x: 138, y: 112, w: 64, h: 76, label: 'You · 98%', hot: true }]} /></div>
-          <div className="auth-tile auth-tile-b"><Scene kind="family" crop={[40, 50, 260, 195]} /></div>
-          <div className="auth-tile auth-tile-c"><Scene kind="college" crop={[40, 40, 260, 195]} /></div>
+          <div className="auth-tile auth-tile-a"><Photo id={PHOTO.mandap} width={700} eager /></div>
+          <div className="auth-tile auth-tile-b"><Photo id={PHOTO.festival} width={600} position="40% 40%" eager /></div>
+          <div className="auth-tile auth-tile-c"><Photo id={PHOTO.tossing} width={600} position="50% 25%" eager /></div>
         </div>
         <div className="auth-aside-copy">
           <h2>{asideTitle}</h2>

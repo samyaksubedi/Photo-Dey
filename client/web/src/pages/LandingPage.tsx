@@ -11,22 +11,16 @@ import {
 import { Link } from 'react-router-dom';
 import { Brand } from '../components/Brand';
 import { ChatPhone, DashMock, TableCard } from '../components/Mockups';
-import { Scene, type Match, type SceneKind } from '../components/Scene';
+import { MatchBox, Photo } from '../components/Photo';
+import { PHOTO } from '../lib/photos';
 import { useAuth } from '../context/AuthContext';
 
-const heroMatches: Match[] = [
-  { x: 138, y: 112, w: 64, h: 76, label: 'You · 98%', hot: true },
-  { x: 206, y: 108, w: 64, h: 80 },
-  { x: 84, y: 130, w: 42, h: 56 },
-  { x: 275, y: 126, w: 42, h: 60 },
-];
-
-const occasions: Array<{ kind: SceneKind; title: string; note: string; crop: [number, number, number, number] }> = [
-  { kind: 'wedding', title: 'Weddings and receptions', note: 'Hundreds of guests, thousands of photos.', crop: [40, 30, 260, 195] },
-  { kind: 'family', title: 'Bratabandha, Pasni and pujas', note: 'Every relative finds their own pictures.', crop: [40, 60, 260, 195] },
-  { kind: 'party', title: 'Sangeet, birthdays and parties', note: 'No more group chats full of files.', crop: [60, 40, 260, 195] },
-  { kind: 'college', title: 'College fests and reunions', note: 'Everyone in the batch gets their own gallery.', crop: [40, 40, 260, 195] },
-  { kind: 'concert', title: 'Concerts and live shows', note: 'Find yourself in a crowd of thousands.', crop: [50, 50, 260, 195] },
+const occasions: Array<{ photo: string; position: string; title: string; note: string }> = [
+  { photo: PHOTO.couple2, position: '50% 40%', title: 'Weddings and receptions', note: 'Hundreds of guests, thousands of photos.' },
+  { photo: PHOTO.festival, position: '45% 40%', title: 'Bratabandha, Pasni and pujas', note: 'Every relative finds their own pictures.' },
+  { photo: PHOTO.birthday, position: '50% 45%', title: 'Sangeet, birthdays and parties', note: 'No more group chats full of files.' },
+  { photo: PHOTO.tossing, position: '50% 30%', title: 'College fests and reunions', note: 'Everyone in the batch gets their own gallery.' },
+  { photo: PHOTO.crowd, position: '55% 40%', title: 'Concerts and live shows', note: 'Find yourself in a crowd of thousands.' },
 ];
 
 export function LandingPage() {
@@ -77,7 +71,9 @@ export function LandingPage() {
 
         <div className="lp-hero-stage" aria-label="A wedding photo with faces matched to a guest">
           <div className="lp-hero-frame">
-            <Scene kind="wedding" matches={heroMatches} />
+            <Photo id={PHOTO.couple} width={1000} position="50% 22%" eager alt="A bride and groom at their wedding" />
+            <MatchBox left={55} top={36.4} width={15} height={15} />
+            <MatchBox left={39} top={40} width={15.5} height={15.6} label="You · 98%" hot />
           </div>
           <div className="lp-hero-phone">
             <ChatPhone />
@@ -100,7 +96,7 @@ export function LandingPage() {
         <div className="lp-occasions">
           {occasions.map((item) => (
             <article className="lp-occasion" key={item.title}>
-              <div className="lp-occasion-art"><Scene kind={item.kind} crop={item.crop} /></div>
+              <div className="lp-occasion-art"><Photo id={item.photo} width={560} position={item.position} /></div>
               <h3>{item.title}</h3>
               <p>{item.note}</p>
             </article>
