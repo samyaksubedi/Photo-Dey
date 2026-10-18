@@ -48,6 +48,7 @@ export type EventSummary = {
   status: EventStatus;
   createdAt: string;
   updatedAt: string;
+  coverUrl?: string | null;
 };
 
 export type EventDetail = EventSummary & {

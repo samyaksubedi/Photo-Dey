@@ -18,8 +18,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { PageLoader } from '../components/PageState';
-import { Photo as CoverPhoto } from '../components/Photo';
-import { coverKind, coverPhoto } from '../lib/photos';
+import { EventCover } from '../components/EventCover';
 import { StatusBadge } from '../components/StatusBadge';
 import { apiRequest } from '../lib/api';
 import {
@@ -183,7 +182,7 @@ export function EventDetailPage() {
       <Link className="back-link" to="/dashboard/events"><ArrowLeft size={15} />All events</Link>
 
       <header className="ed-head">
-        <div className="ed-cover"><CoverPhoto id={coverPhoto(coverKind(event.name, event.id))} width={480} /></div>
+        <div className="ed-cover"><EventCover url={photosQuery.data?.find((p) => p.secureUrl)?.secureUrl} width={480} /></div>
         <div className="ed-title">
           <div className="ed-meta"><StatusBadge status={status.status} /><span>{dateLabel}</span></div>
           <h1>{event.name}</h1>

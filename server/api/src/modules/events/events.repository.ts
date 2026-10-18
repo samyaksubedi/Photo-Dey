@@ -25,7 +25,7 @@ const createEvent = async (data: Prisma.EventUncheckedCreateInput) => {
 };
 
 const getEvents = async (userId: string) => {
-  return await prisma.event.findMany({
+  const events = await prisma.event.findMany({
     where: {
       userId,
     },
@@ -41,8 +41,19 @@ const getEvents = async (userId: string) => {
       status: true,
       createdAt: true,
       updatedAt: true,
+      // First uploaded photo, used as the event thumbnail.
+      photos: {
+        where: { secureUrl: { not: null } },
+        select: { secureUrl: true },
+        orderBy: { id: 'asc' },
+        take: 1,
+      },
     },
   });
+  return events.map(({ photos, ...event }) => ({
+    ...event,
+    coverUrl: photos[0]?.secureUrl ?? null,
+  }));
 };
 const findById = async (id: string) => {
   return await prisma.event.findUnique({

@@ -1,8 +1,7 @@
 import { Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { EventSummary } from '../types';
-import { coverKind, coverPhoto } from '../lib/photos';
-import { Photo } from './Photo';
+import { EventCover } from './EventCover';
 import { StatusBadge } from './StatusBadge';
 
 export const formatDate = (value: string) =>
@@ -14,7 +13,7 @@ export function EventCard({ event }: { event: EventSummary }) {
   return (
     <Link className="ev-card" to={`/dashboard/events/${event.id}`}>
       <div className="ev-cover">
-        <Photo id={coverPhoto(coverKind(event.name, event.id))} width={640} />
+        <EventCover url={event.coverUrl} />
         <StatusBadge status={event.status} />
       </div>
       <div className="ev-body">
