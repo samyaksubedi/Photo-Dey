@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EventCard } from '../components/EventCard';
 import { EmptyState, PageLoader } from '../components/PageState';
-import { Scene } from '../components/Scene';
+import { MatchBox, Photo } from '../components/Photo';
+import { PHOTO } from '../lib/photos';
 import { useAuth } from '../context/AuthContext';
 import { apiRequest } from '../lib/api';
 import type { EventSummary } from '../types';
@@ -19,7 +20,7 @@ const isReady = (event: EventSummary) => event.status === 'COMPLETED' || event.s
 function FirstEvent() {
   return (
     <div className="first-event">
-      <div className="first-event-art"><Scene kind="wedding" matches={[{ x: 138, y: 112, w: 64, h: 76, hot: true }]} /></div>
+      <div className="first-event-art"><Photo id={PHOTO.couple2} width={700} position="50% 38%" /><MatchBox left={33} top={35} width={19} height={17} label="You" hot /></div>
       <div>
         <h2>Create your first event</h2>
         <p>Name it, add the photos, and PhotoDey prepares a QR code your guests can scan to find their own pictures.</p>
