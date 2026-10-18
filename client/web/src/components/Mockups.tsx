@@ -1,5 +1,6 @@
 import { QRCodeSVG } from 'qrcode.react';
-import { Bust, Scene, type SceneKind } from './Scene';
+import { PHOTO } from '../lib/photos';
+import { Photo } from './Photo';
 
 export function ChatPhone({ event = 'Priya & Arjun Wedding', count = 24 }: { event?: string; count?: number }) {
   return (
@@ -17,10 +18,7 @@ export function ChatPhone({ event = 'Priya & Arjun Wedding', count = 24 }: { eve
           Welcome to <b>{event}</b>. Send one clear selfie and I will find your photos.
         </p>
         <div className="bubble bubble-me bubble-selfie">
-          <svg viewBox="0 0 120 120">
-            <rect width="120" height="120" fill="#F8E1E6" />
-            <Bust x={60} y={52} s={0.95} skin={1} cloth="#1F6F6B" longHair />
-          </svg>
+          <Photo id={PHOTO.portrait} width={240} position="50% 30%" />
         </div>
         <p className="bubble bubble-bot">Looking through the event photos.</p>
         <p className="bubble bubble-bot">
@@ -55,15 +53,15 @@ export function TableCard({
   );
 }
 
-const tiles: Array<[SceneKind, [number, number, number, number]]> = [
-  ['wedding', [60, 40, 220, 165]],
-  ['wedding', [150, 90, 200, 150]],
-  ['family', [40, 70, 240, 180]],
-  ['concert', [100, 80, 220, 165]],
-  ['party', [90, 60, 220, 165]],
-  ['college', [60, 60, 240, 180]],
-  ['wedding', [20, 60, 220, 165]],
-  ['family', [150, 80, 220, 165]],
+const tiles: Array<[string, string]> = [
+  [PHOTO.couple, '50% 38%'],
+  [PHOTO.festival, '40% 40%'],
+  [PHOTO.birthday, '50% 40%'],
+  [PHOTO.crowd, '50% 40%'],
+  [PHOTO.tossing, '50% 30%'],
+  [PHOTO.diya, '50% 50%'],
+  [PHOTO.couple2, '50% 42%'],
+  [PHOTO.family, '50% 40%'],
 ];
 
 export function DashMock() {
@@ -93,9 +91,9 @@ export function DashMock() {
           </i>
         </div>
         <div className="dm-grid">
-          {tiles.map(([kind, crop], index) => (
-            <div key={index}>
-              <Scene kind={kind} crop={crop} />
+          {tiles.map(([id, position]) => (
+            <div key={id}>
+              <Photo id={id} width={260} position={position} />
             </div>
           ))}
         </div>
