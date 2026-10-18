@@ -380,13 +380,13 @@ input:disabled { background: var(--paper-2); color: var(--muted); }
 .auth-success p { color: var(--ink-2); }
 .auth-success-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
 
-.auth-aside { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(28px, 4vw, 56px); background: var(--night); background-image: radial-gradient(circle at 80% 0%, rgba(242, 169, 59, 0.28), transparent 50%); color: #fff; }
-.auth-collage { position: absolute; inset: 0; }
+.auth-aside { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; gap: 28px; padding: clamp(28px, 4vw, 56px); background: var(--night); background-image: radial-gradient(circle at 80% 0%, rgba(242, 169, 59, 0.28), transparent 50%); color: #fff; }
+.auth-collage { position: relative; flex: none; width: 100%; aspect-ratio: 3 / 2; }
 .auth-tile { position: absolute; background: var(--night-2); aspect-ratio: 4 / 3; border-radius: 20px; overflow: hidden; border: 5px solid #fff; box-shadow: var(--shadow-lg); }
 .auth-tile-a { top: 9%; left: 9%; width: 56%; transform: rotate(-5deg); }
 .auth-tile-b { top: 25%; right: 7%; width: 46%; transform: rotate(5deg); }
 .auth-tile-c { top: 44%; left: 18%; width: 42%; transform: rotate(-2deg); }
-.auth-aside-copy { position: relative; max-width: 30ch; }
+.auth-aside-copy { position: relative; z-index: 1; max-width: 36ch; }
 .auth-aside-copy h2 { font-size: clamp(28px, 3vw, 38px); line-height: 1.05; }
 .auth-aside-copy p { margin-top: 12px; color: #d9c8c8; }
 
