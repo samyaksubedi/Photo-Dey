@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Camera, CheckCircle2, Clock3, Images, Plus } from 'lucide-react';
+import { ArrowRight, Plus } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { EventCard } from '../components/EventCard';
 import { EmptyState, PageLoader } from '../components/PageState';
-import { StatusBadge } from '../components/StatusBadge';
+import { Scene } from '../components/Scene';
 import { useAuth } from '../context/AuthContext';
 import { apiRequest } from '../lib/api';
 import type { EventSummary } from '../types';
@@ -12,61 +14,110 @@ const fetchEvents = async () => {
   return response.data.events;
 };
 
+const isReady = (event: EventSummary) => event.status === 'COMPLETED' || event.status === 'PARTIAL_FAILURE';
+
+function FirstEvent() {
+  return (
+    <div className="first-event">
+      <div className="first-event-art"><Scene kind="wedding" matches={[{ x: 138, y: 112, w: 64, h: 76, hot: true }]} /></div>
+      <div>
+        <h2>Create your first event</h2>
+        <p>Name it, add the photos, and PhotoDey prepares a QR code your guests can scan to find their own pictures.</p>
+        <Link className="btn btn-primary btn-lg" to="/dashboard/events/new"><Plus size={18} />Create an event</Link>
+      </div>
+    </div>
+  );
+}
+
 export function DashboardPage() {
   const { user } = useAuth();
   const { data: events, isLoading, error } = useQuery({ queryKey: ['events'], queryFn: fetchEvents });
 
   if (isLoading) return <PageLoader label="Loading your events" />;
-  if (error) return <EmptyState eyebrow="Could not load" title="Your events are out of reach." body={error.message} />;
+  if (error) return <EmptyState title="Your events could not be loaded." body={error.message} />;
 
-  const ready = events?.filter((event) => event.status === 'COMPLETED' || event.status === 'PARTIAL_FAILURE').length ?? 0;
-  const processing = events?.filter((event) => event.status === 'PROCESSING').length ?? 0;
-  const totalPhotos = events?.reduce((sum, event) => sum + event.totalPhotos, 0) ?? 0;
+  const list = events ?? [];
+  const ready = list.filter(isReady).length;
+  const processing = list.filter((event) => event.status === 'PROCESSING').length;
+  const totalPhotos = list.reduce((sum, event) => sum + event.totalPhotos, 0);
 
   return (
     <>
-      <div className="dashboard-heading">
-        <div><p className="section-kicker">Good to see you, {user?.name?.split(' ')[0]}</p><h1>Your events,<br /><em>at a glance.</em></h1></div>
-        <p>See what is ready, what is still processing, and what your guests can access.</p>
-      </div>
+      <header className="page-head">
+        <div>
+          <h1>Namaste, {user?.name?.split(' ')[0]}</h1>
+          <p>Here is where your events stand today.</p>
+        </div>
+        <Link className="btn btn-primary" to="/dashboard/events/new"><Plus size={17} />New event</Link>
+      </header>
 
-      <div className="stat-grid">
-        <article><span><Images size={18} /></span><p>All events</p><strong>{events?.length ?? 0}</strong><small>Your complete workspace</small></article>
-        <article><span><CheckCircle2 size={18} /></span><p>Ready to share</p><strong>{ready}</strong><small>Completed or partially ready</small></article>
-        <article><span><Clock3 size={18} /></span><p>Processing now</p><strong>{processing}</strong><small>Preparing face matches</small></article>
-        <article><span><Camera size={18} /></span><p>Photographs</p><strong>{totalPhotos}</strong><small>Across all events</small></article>
-      </div>
-
-      <section className="dashboard-section">
-        <div className="dashboard-section-head"><div><p className="section-kicker">Recent work</p><h2>Latest events</h2></div>{events?.length ? <Link className="inline-action" to="/dashboard/events">View every event <ArrowRight size={16} /></Link> : null}</div>
-        {!events?.length ? (
-          <EmptyState eyebrow="Your first event" title="A beautifully empty workspace." body="Add an event, upload its photographs, and PhotoDey will prepare a private discovery experience for every guest." action={<Link className="button button-accent" to="/dashboard/events/new"><Plus size={16} />Create an event</Link>} />
-        ) : (
-          <div className="event-list">
-            {events.slice(0, 5).map((event) => (
-              <Link className="event-row" to={`/dashboard/events/${event.id}`} key={event.id}>
-                <span className="event-monogram">{event.name.slice(0, 2).toUpperCase()}</span>
-                <div className="event-main"><strong>{event.name}</strong><small>{new Date(event.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</small></div>
-                <div className="event-count"><strong>{event.totalPhotos}</strong><small>photos</small></div>
-                <StatusBadge status={event.status} />
-                <ArrowRight size={17} />
-              </Link>
-            ))}
-          </div>
-        )}
+      <section className="summary" aria-label="Summary">
+        <div><strong>{list.length}</strong><span>Events</span></div>
+        <div><strong>{ready}</strong><span>Ready to share</span></div>
+        <div><strong>{processing}</strong><span>Processing now</span></div>
+        <div><strong>{totalPhotos.toLocaleString()}</strong><span>Photos in total</span></div>
       </section>
+
+      {!list.length ? (
+        <FirstEvent />
+      ) : (
+        <section className="block">
+          <div className="block-head">
+            <h2>Recent events</h2>
+            <Link className="link-arrow" to="/dashboard/events">All events <ArrowRight size={16} /></Link>
+          </div>
+          <div className="ev-grid">{list.slice(0, 6).map((event) => <EventCard key={event.id} event={event} />)}</div>
+        </section>
+      )}
     </>
   );
 }
 
+type Filter = 'all' | 'ready' | 'processing' | 'attention';
+
 export function EventsPage() {
   const { data: events, isLoading, error } = useQuery({ queryKey: ['events'], queryFn: fetchEvents });
+  const [filter, setFilter] = useState<Filter>('all');
   if (isLoading) return <PageLoader label="Loading events" />;
-  if (error) return <EmptyState eyebrow="Could not load" title="Your events are out of reach." body={error.message} />;
+  if (error) return <EmptyState title="Your events could not be loaded." body={error.message} />;
+
+  const list = events ?? [];
+  const groups: Record<Filter, EventSummary[]> = {
+    all: list,
+    ready: list.filter(isReady),
+    processing: list.filter((event) => event.status === 'PROCESSING' || event.status === 'CREATED'),
+    attention: list.filter((event) => event.status === 'FAILED' || event.failedPhotos > 0),
+  };
+  const tabs: Array<[Filter, string]> = [['all', 'All'], ['ready', 'Ready'], ['processing', 'In progress'], ['attention', 'Needs attention']];
+  const shown = groups[filter];
+
   return (
     <>
-      <div className="simple-page-head"><div><p className="section-kicker">Event library</p><h1>Every event.</h1><p>Manage processing, guest access, photographs, and QR sharing.</p></div></div>
-      {!events?.length ? <EmptyState eyebrow="Nothing here yet" title="Create your first event." body="Your event library will live here." /> : <div className="event-card-grid">{events.map((event) => <Link className="event-card" to={`/dashboard/events/${event.id}`} key={event.id}><div className="event-card-top"><span className="event-monogram">{event.name.slice(0, 2).toUpperCase()}</span><StatusBadge status={event.status} /></div><h2>{event.name}</h2><p>{new Date(event.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</p><div className="event-card-meta"><span><strong>{event.totalPhotos}</strong>photos</span><span><strong>{event.uploadedPhotos}</strong>uploaded</span><ArrowRight size={17} /></div></Link>)}</div>}
+      <header className="page-head">
+        <div>
+          <h1>Events</h1>
+          <p>Open an event to add photos, share its QR code, or change guest access.</p>
+        </div>
+        <Link className="btn btn-primary" to="/dashboard/events/new"><Plus size={17} />New event</Link>
+      </header>
+      {!list.length ? (
+        <FirstEvent />
+      ) : (
+        <>
+          <div className="chips" role="tablist" aria-label="Filter events">
+            {tabs.map(([key, label]) => (
+              <button key={key} role="tab" aria-selected={filter === key} className={`chip${filter === key ? ' is-on' : ''}`} onClick={() => setFilter(key)}>
+                {label}<span>{groups[key].length}</span>
+              </button>
+            ))}
+          </div>
+          {shown.length ? (
+            <div className="ev-grid">{shown.map((event) => <EventCard key={event.id} event={event} />)}</div>
+          ) : (
+            <EmptyState title="Nothing here." body="No events match this filter right now." />
+          )}
+        </>
+      )}
     </>
   );
 }

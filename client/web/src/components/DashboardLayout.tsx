@@ -1,14 +1,4 @@
-import {
-  CalendarDays,
-  ChevronDown,
-  Images,
-  LayoutGrid,
-  LogOut,
-  Menu,
-  Plus,
-  ShieldCheck,
-  X,
-} from 'lucide-react';
+import { Images, LayoutGrid, LogOut, Menu, Plus, ShieldCheck, X } from 'lucide-react';
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -23,31 +13,38 @@ export function DashboardLayout() {
     await signOut();
     navigate('/');
   };
+  const close = () => setOpen(false);
 
   return (
-    <div className="dashboard-shell">
-      <aside className={`dashboard-sidebar${open ? ' is-open' : ''}`}>
-        <div className="sidebar-head"><Brand /><button className="icon-button sidebar-close" onClick={() => setOpen(false)} aria-label="Close menu"><X size={18} /></button></div>
-        <nav className="dashboard-nav">
-          <span>Workspace</span>
-          <NavLink end to="/dashboard" onClick={() => setOpen(false)}><LayoutGrid size={17} />Overview</NavLink>
-          <NavLink to="/dashboard/events" onClick={() => setOpen(false)}><Images size={17} />Events</NavLink>
-          <NavLink to="/dashboard/account" onClick={() => setOpen(false)}><ShieldCheck size={17} />Account & security</NavLink>
+    <div className="app">
+      <aside className={`app-side${open ? ' is-open' : ''}`}>
+        <div className="app-side-head">
+          <Brand light />
+          <button className="app-icon-btn app-side-close" onClick={close} aria-label="Close menu"><X size={18} /></button>
+        </div>
+        <NavLink className="btn btn-gold app-new" to="/dashboard/events/new" onClick={close}><Plus size={17} />New event</NavLink>
+        <nav className="app-nav" aria-label="Dashboard">
+          <NavLink end to="/dashboard" onClick={close}><LayoutGrid size={18} />Overview</NavLink>
+          <NavLink to="/dashboard/events" onClick={close}><Images size={18} />Events</NavLink>
+          <NavLink to="/dashboard/account" onClick={close}><ShieldCheck size={18} />Account</NavLink>
         </nav>
-        <div className="sidebar-foot">
-          <div className="sidebar-tip"><CalendarDays size={19} /><strong>Ready for the next event?</strong><p>Upload photographs and share one public QR.</p></div>
-          <div className="sidebar-account"><NavLink to="/dashboard/account" onClick={() => setOpen(false)}><span>{user?.name?.charAt(0).toUpperCase()}</span><div><strong>{user?.name}</strong><small>{user?.email}</small></div></NavLink><button onClick={logout} aria-label="Sign out"><LogOut size={15} /></button></div>
+        <div className="app-side-foot">
+          <NavLink className="app-user" to="/dashboard/account" onClick={close}>
+            <span>{user?.name?.charAt(0).toUpperCase()}</span>
+            <div><strong>{user?.name}</strong><small>{user?.email}</small></div>
+          </NavLink>
+          <button className="app-icon-btn" onClick={logout} aria-label="Sign out"><LogOut size={17} /></button>
         </div>
       </aside>
-      {open && <button className="sidebar-scrim" onClick={() => setOpen(false)} aria-label="Close menu" />}
-      <section className="dashboard-main">
-        <header className="dashboard-topbar">
-          <button className="icon-button menu-button" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={19} /></button>
-          <div className="topbar-context"><span>Organizer workspace</span><strong>PhotoDey <ChevronDown size={13} /></strong></div>
-          <NavLink className="button button-dark button-small" to="/dashboard/events/new"><Plus size={15} />New event</NavLink>
+      {open && <button className="app-scrim" onClick={close} aria-label="Close menu" />}
+      <div className="app-main">
+        <header className="app-top">
+          <button className="app-icon-btn" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={20} /></button>
+          <Brand />
+          <NavLink className="btn btn-primary btn-sm" to="/dashboard/events/new"><Plus size={15} />New</NavLink>
         </header>
-        <div className="dashboard-content"><Outlet /></div>
-      </section>
+        <div className="app-content"><Outlet /></div>
+      </div>
     </div>
   );
 }

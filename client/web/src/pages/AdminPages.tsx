@@ -103,7 +103,7 @@ export function AdminLoginPage() {
           <label>Email address<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="admin@example.com" /></label>
           <label>Password<input required minLength={6} type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Your password" /></label>
           {error && <p className="form-error">{error}</p>}
-          <button className="button button-dark button-wide" disabled={submitting}>{submitting ? <LoaderCircle className="spin" size={17} /> : <>Enter console <ArrowRight size={17} /></>}</button>
+          <button className="btn btn-primary btn-block" disabled={submitting}>{submitting ? <LoaderCircle className="spin" size={17} /> : <>Enter console <ArrowRight size={17} /></>}</button>
         </form>
       </section>
     </main>

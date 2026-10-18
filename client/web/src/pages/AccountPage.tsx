@@ -49,37 +49,45 @@ export function AccountPage() {
   };
 
   return (
-    <div className="account-page">
-      <div className="simple-page-head account-page-head">
-        <div><p className="section-kicker">Account & security</p><h1>Your workspace.</h1><p>Review your organizer profile and every device currently signed in.</p></div>
-        <span className="account-shield"><ShieldCheck size={22} />Protected by short-lived access tokens</span>
-      </div>
+    <div className="acct">
+      <header className="page-head">
+        <div>
+          <h1>Account</h1>
+          <p>Your profile and every device that is signed in.</p>
+        </div>
+      </header>
 
-      <section className="account-profile-card">
-        <span>{user?.name.charAt(0).toUpperCase()}</span>
-        <div><p className="section-kicker">Organizer profile</p><h2>{user?.name}</h2><p>{user?.email}</p></div>
-        <span className="verified-pill"><ShieldCheck size={14} />Verified account</span>
+      <section className="acct-profile">
+        <span className="acct-avatar">{user?.name.charAt(0).toUpperCase()}</span>
+        <div>
+          <h2>{user?.name}</h2>
+          <p>{user?.email}</p>
+        </div>
+        <span className="verified-pill"><ShieldCheck size={15} />Email verified</span>
       </section>
 
-      <section className="sessions-section">
-        <div className="dashboard-section-head"><div><p className="section-kicker">Authentication</p><h2>Signed-in devices</h2></div><p>Refreshing an access token updates the device’s last activity.</p></div>
-        {sessionsQuery.isLoading ? <PageLoader label="Loading your sessions" /> : sessionsQuery.error ? <EmptyState eyebrow="Could not load" title="Your sessions are unavailable." body={sessionsQuery.error.message} /> : (
+      <section className="block">
+        <div className="block-head"><h2>Signed-in devices</h2></div>
+        {sessionsQuery.isLoading ? <PageLoader label="Loading your devices" /> : sessionsQuery.error ? <EmptyState title="Your devices could not be loaded." body={sessionsQuery.error.message} /> : (
           <div className="session-list">
             {sessionsQuery.data?.map((session) => (
               <article className="session-row" key={session.id}>
                 <span className="session-device"><DeviceIcon type={session.deviceInfo.deviceType} /></span>
                 <div className="session-main"><strong>{session.deviceInfo.browser} on {session.deviceInfo.os}</strong><span>{session.deviceInfo.deviceType || 'desktop'} · {session.ipAddress}</span></div>
-                <div className="session-time"><Clock3 size={13} /><span>Last active {new Date(session.lastUsedAt).toLocaleString()}</span></div>
-                {session.isCurrent ? <span className="current-session">This device</span> : <span className="other-session"><Globe2 size={12} />Active</span>}
+                <div className="session-time"><Clock3 size={14} /><span>Last active {new Date(session.lastUsedAt).toLocaleString()}</span></div>
+                {session.isCurrent ? <span className="current-session">This device</span> : <span className="other-session"><Globe2 size={13} />Signed in</span>}
               </article>
             ))}
           </div>
         )}
       </section>
 
-      <section className="account-danger-zone">
-        <div><p className="section-kicker">Security action</p><h2>Sign out everywhere</h2><p>This revokes every refresh session, including the device you are using now.</p></div>
-        <button className="button button-danger" onClick={endEverySession} disabled={endingSessions}>{endingSessions ? <LoaderCircle className="spin" size={16} /> : <LogOut size={16} />}Sign out all devices</button>
+      <section className="acct-danger">
+        <div>
+          <h2>Sign out everywhere</h2>
+          <p>This ends every session, including the one you are using now. You will need to sign in again.</p>
+        </div>
+        <button className="btn btn-danger" onClick={endEverySession} disabled={endingSessions}>{endingSessions ? <LoaderCircle className="spin" size={16} /> : <LogOut size={16} />}Sign out all devices</button>
         {actionError && <p className="form-error">{actionError}</p>}
       </section>
     </div>

@@ -120,42 +120,35 @@ export function CreateEventPage() {
   };
 
   return (
-    <div className="create-event-page">
+    <div className="ce">
       <Link className="back-link" to="/dashboard/events">
         <ArrowLeft size={15} />Back to events
       </Link>
-      <div className="create-event-head">
+      <header className="page-head">
         <div>
-          <p className="section-kicker">New event</p>
-          <h1>Create the space<br />for every <em>moment.</em></h1>
+          <h1>New event</h1>
+          <p>Name it, add the photos, and PhotoDey does the rest.</p>
         </div>
-        <p>Give the event a name, add its photographs, and PhotoDey will handle the rest in the background.</p>
-      </div>
+      </header>
 
-      <form className="create-event-form" onSubmit={submit}>
-        <section className="form-section">
-          <div className="form-section-number">01</div>
-          <div className="form-section-body">
-            <label className="large-field">
-              Event name
-              <input
-                required
-                disabled={uploadLocked}
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="e.g. Maya & Aarav’s Wedding"
-              />
-            </label>
-            <p>This is visible to guests when they scan the event QR.</p>
-          </div>
-        </section>
+      <div className="ce-grid">
+        <form className="ce-form" onSubmit={submit}>
+          <label className="field">
+            <span>Event name</span>
+            <input
+              required
+              disabled={uploadLocked}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="e.g. Maya and Aarav’s wedding"
+            />
+            <small>Guests see this name when they scan the QR code.</small>
+          </label>
 
-        <section className="form-section">
-          <div className="form-section-number">02</div>
-          <div className="form-section-body">
-            <div className="form-label">
-              Event photographs
-              <span>{files.length ? `${files.length} selected` : 'JPG, PNG or WEBP · max 50 MB each'}</span>
+          <div className="field">
+            <div className="field-row">
+              <span>Photos</span>
+              <small>{files.length ? `${files.length.toLocaleString()} selected` : 'JPG, PNG or WEBP, up to 50 MB each'}</small>
             </div>
             <div
               className={`dropzone${dragging ? ' is-dragging' : ''}${uploadLocked ? ' is-disabled' : ''}`}
@@ -179,9 +172,9 @@ export function CreateEventPage() {
                 accept="image/jpeg,image/png,image/webp"
                 onChange={(event) => addFiles(Array.from(event.target.files ?? []))}
               />
-              <span><UploadCloud size={24} /></span>
-              <strong>Drop your photographs here</strong>
-              <p>or choose files from your computer</p>
+              <span><UploadCloud size={26} /></span>
+              <strong>Drop your photos here</strong>
+              <p>or click to choose them from your computer</p>
             </div>
             {previews.length > 0 && (
               <div className="upload-preview-grid">
@@ -211,47 +204,52 @@ export function CreateEventPage() {
               </div>
             )}
           </div>
-        </section>
 
-        {error && <p className="form-error form-error-wide">{error}</p>}
-        {progress && (
-          <div className="upload-progress">
-            <div>
-              <span>Sending photographs</span>
-              <strong>{progress.percent}%</strong>
+          {error && <p className="form-error">{error}</p>}
+          {progress && (
+            <div className="upload-progress">
+              <div>
+                <span>Sending photos</span>
+                <strong>{progress.percent}%</strong>
+              </div>
+              <i><span style={{ width: `${progress.percent}%` }} /></i>
+              <div className="upload-count-progress">
+                <strong>{progress.sentPhotos} of {progress.totalPhotos} photos sent</strong>
+                <span>{progress.remainingPhotos} remaining</span>
+              </div>
+              <p>
+                {progress.completedBatches} done · {progress.activeBatches} uploading · {progress.waitingBatches} waiting
+              </p>
             </div>
-            <i><span style={{ width: `${progress.percent}%` }} /></i>
-            <div className="upload-count-progress">
-              <strong>{progress.sentPhotos} of {progress.totalPhotos} photos sent</strong>
-              <span>{progress.remainingPhotos} remaining</span>
-            </div>
-            <p>
-              {progress.completedBatches} completed · {progress.activeBatches} uploading · {progress.waitingBatches} waiting
-            </p>
+          )}
+
+          <div className="form-actions">
+            <Link className="btn btn-ghost" to="/dashboard/events">Cancel</Link>
+            <button
+              className="btn btn-primary btn-lg"
+              disabled={submitting || !name.trim() || !files.length}
+            >
+              {submitting ? (
+                <><LoaderCircle className="spin" size={17} />Sending photos</>
+              ) : createdEventId ? (
+                <><UploadCloud size={17} />Retry upload</>
+              ) : (
+                <>Create event <ArrowRight size={17} /></>
+              )}
+            </button>
           </div>
-        )}
+        </form>
 
-        <div className="form-actions">
-          <Link className="button button-quiet" to="/dashboard/events">Cancel</Link>
-          <button
-            className="button button-accent"
-            disabled={submitting || !name.trim() || !files.length}
-          >
-            {submitting ? (
-              <><LoaderCircle className="spin" size={17} />Sending photos</>
-            ) : createdEventId ? (
-              <><UploadCloud size={17} />Retry upload</>
-            ) : (
-              <>Create event <ArrowRight size={17} /></>
-            )}
-          </button>
-        </div>
-      </form>
-
-      <aside className="upload-note">
-        <ImagePlus size={18} />
-        <p><strong>What happens next?</strong>Up to three safe-size batches upload at once. Face matching then runs in the background.</p>
-      </aside>
+        <aside className="ce-aside">
+          <h2>What happens next</h2>
+          <ol>
+            <li><b>Your photos upload</b><span>In safe batches, three at a time. Keep this tab open until it finishes.</span></li>
+            <li><b>Faces are matched</b><span>This runs in the background, and you can watch the progress on the event page.</span></li>
+            <li><b>You get a QR code</b><span>Print it or share the link. Guests do the rest on Telegram.</span></li>
+          </ol>
+          <p className="ce-limit"><ImagePlus size={16} />Up to 5,000 photos per event.</p>
+        </aside>
+      </div>
     </div>
   );
 }

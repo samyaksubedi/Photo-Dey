@@ -16,9 +16,9 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useMemo, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { PageLoader } from '../components/PageState';
+import { Scene, coverKind } from '../components/Scene';
 import { StatusBadge } from '../components/StatusBadge';
 import { apiRequest } from '../lib/api';
 import {
@@ -175,24 +175,139 @@ export function EventDetailPage() {
     URL.revokeObjectURL(url);
   };
 
+  const dateLabel = new Date(event.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+
   return (
     <>
       <Link className="back-link" to="/dashboard/events"><ArrowLeft size={15} />All events</Link>
-      <div className="event-detail-head"><div><div className="event-title-line"><StatusBadge status={status.status} /><span>{new Date(event.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span></div><h1>{event.name}</h1><p>{status.receivedPhotos} of {status.totalPhotos} photographs received</p></div><div className="head-actions"><input ref={photoInputRef} hidden multiple type="file" accept="image/jpeg,image/png,image/webp" onChange={(inputEvent) => { const incoming = Array.from(inputEvent.target.files ?? []); inputEvent.target.value = ''; addPhotos(incoming); }} /><button className="button button-accent" onClick={() => addSessionRef.current ? void runAddPhotoUpload() : photoInputRef.current?.click()} disabled={addingPhotos}>{addingPhotos ? <LoaderCircle className="spin" size={15} /> : addSessionRef.current ? <UploadCloud size={15} /> : <ImagePlus size={15} />}{addingPhotos ? 'Sending photos' : addSessionRef.current ? 'Retry photos' : 'Add photographs'}</button><button className="button button-quiet" onClick={() => toggleMutation.mutate(!event.publicEnabled)} disabled={toggleMutation.isPending}><Power size={15} />Public access {event.publicEnabled ? 'on' : 'off'}</button><button className="icon-button danger-button" onClick={() => setConfirmDelete(true)} aria-label="Delete event"><Trash2 size={17} /></button></div></div>
 
-      {(addProgress || addError) && <div className="upload-progress event-add-progress">{addProgress && <><div><span>Sending additional photographs</span><strong>{addProgress.percent}%</strong></div><i><span style={{ width: `${addProgress.percent}%` }} /></i><div className="upload-count-progress"><strong>{addProgress.sentPhotos} of {addProgress.totalPhotos} photos sent</strong><span>{addProgress.remainingPhotos} remaining</span></div><p>{addProgress.completedBatches} completed · {addProgress.activeBatches} uploading · {addProgress.waitingBatches} waiting</p></>}{addError && <p className="form-error">{addError}</p>}</div>}
+      <header className="ed-head">
+        <div className="ed-cover"><Scene kind={coverKind(event.name, event.id)} /></div>
+        <div className="ed-title">
+          <div className="ed-meta"><StatusBadge status={status.status} /><span>{dateLabel}</span></div>
+          <h1>{event.name}</h1>
+          <p>{status.receivedPhotos.toLocaleString()} of {status.totalPhotos.toLocaleString()} photos received</p>
+        </div>
+        <div className="ed-actions">
+          <input ref={photoInputRef} hidden multiple type="file" accept="image/jpeg,image/png,image/webp" onChange={(inputEvent) => { const incoming = Array.from(inputEvent.target.files ?? []); inputEvent.target.value = ''; addPhotos(incoming); }} />
+          <button className="btn btn-primary" onClick={() => addSessionRef.current ? void runAddPhotoUpload() : photoInputRef.current?.click()} disabled={addingPhotos}>
+            {addingPhotos ? <LoaderCircle className="spin" size={16} /> : addSessionRef.current ? <UploadCloud size={16} /> : <ImagePlus size={16} />}
+            {addingPhotos ? 'Sending photos' : addSessionRef.current ? 'Retry upload' : 'Add photos'}
+          </button>
+          <button className="btn btn-ghost" onClick={() => toggleMutation.mutate(!event.publicEnabled)} disabled={toggleMutation.isPending} aria-pressed={event.publicEnabled}>
+            <Power size={16} />Guest search {event.publicEnabled ? 'on' : 'off'}
+          </button>
+          <button className="app-icon-btn is-danger" onClick={() => setConfirmDelete(true)} aria-label="Delete event"><Trash2 size={18} /></button>
+        </div>
+      </header>
 
-      <section className="processing-panel"><div className="processing-copy"><p className="section-kicker">Processing progress</p><h2>{ready ? 'Your event is ready to share.' : 'Preparing every photograph.'}</h2><p>{ready ? 'Guests can now use the public event link to find their moments.' : 'Face matching runs one photograph at a time. This page updates automatically.'}</p></div><div className="progress-ring" style={{ '--progress': `${progress * 3.6}deg` } as CSSProperties}><span><strong>{progress}%</strong><small>complete</small></span></div><div className="processing-stats"><div><strong>{status.uploadedPhotos}</strong><span>Uploaded</span></div><div><strong>{status.processingPhotos}</strong><span>Processing</span></div><div><strong>{status.completedPhotos}</strong><span>Completed</span></div><div><strong>{status.failedPhotos}</strong><span>Failed</span></div></div></section>
+      {(addProgress || addError) && (
+        <div className="upload-progress">
+          {addProgress && (
+            <>
+              <div><span>Sending additional photos</span><strong>{addProgress.percent}%</strong></div>
+              <i><span style={{ width: `${addProgress.percent}%` }} /></i>
+              <div className="upload-count-progress"><strong>{addProgress.sentPhotos} of {addProgress.totalPhotos} photos sent</strong><span>{addProgress.remainingPhotos} remaining</span></div>
+              <p>{addProgress.completedBatches} done · {addProgress.activeBatches} uploading · {addProgress.waitingBatches} waiting</p>
+            </>
+          )}
+          {addError && <p className="form-error">{addError}</p>}
+        </div>
+      )}
 
-      <div className="event-detail-grid">
-        <section className="event-photos-panel"><div className="panel-head"><div><p className="section-kicker">Complete event library</p><h2>Every photograph</h2></div><span>{photosQuery.data?.length ?? 0} files</span></div>{photosQuery.isLoading ? <PageLoader label="Loading photographs" /> : photosQuery.data?.length ? <div className="photo-thumb-grid event-full-photo-grid">{photosQuery.data.map((photo, index) => photo.secureUrl ? <button className="organizer-photo-item" key={photo.id} onClick={() => setViewingPhoto(photo)} aria-label={`Open event photograph ${index + 1}`}><img src={photo.secureUrl} alt={`Event photograph ${index + 1}`} loading="lazy" /><span className={`photo-state photo-${photo.status.toLowerCase()}`}>{photo.status.replace('_', ' ')}</span><span className="photo-open-icon"><Maximize2 size={14} /></span></button> : <div className="photo-placeholder" key={photo.id}><ImageOff size={19} /><span>{photo.status.replace('_', ' ')}</span></div>)}</div> : <div className="photo-empty"><ImageOff size={22} /><p>Uploaded photographs will appear here.</p></div>}</section>
+      <section className="ed-pipeline">
+        <div className="ed-pipeline-top">
+          <div>
+            <h2>{ready ? 'Ready to share' : 'Preparing your photos'}</h2>
+            <p>{ready ? 'Guests can scan the QR code and find their photos now.' : 'Faces are being matched in the background. This page updates by itself.'}</p>
+          </div>
+          <strong className="ed-pct">{progress}%</strong>
+        </div>
+        <div className="bar" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Processing progress"><u style={{ width: `${progress}%` }} /></div>
+        <dl className="ed-stats">
+          <div><dd>{status.uploadedPhotos.toLocaleString()}</dd><dt>Uploaded</dt></div>
+          <div><dd>{status.processingPhotos.toLocaleString()}</dd><dt>Processing</dt></div>
+          <div><dd>{status.completedPhotos.toLocaleString()}</dd><dt>Matched and ready</dt></div>
+          <div className={status.failedPhotos ? 'has-fail' : ''}><dd>{status.failedPhotos.toLocaleString()}</dd><dt>Failed</dt></div>
+        </dl>
+      </section>
 
-        <aside className="qr-panel"><div className="panel-head"><div><p className="section-kicker">Guest access</p><h2>Event QR</h2></div><span className={`access-dot${event.publicEnabled ? ' is-on' : ''}`}>{event.publicEnabled ? 'Live' : 'Off'}</span></div><div className={`qr-card${!ready || !event.publicEnabled ? ' is-disabled' : ''}`} ref={qrRef}><QRCodeSVG value={publicUrl} size={180} level="H" marginSize={2} bgColor="#fffdf8" fgColor="#17161d" /><span className="qr-brand">PhotoDey</span></div><p>{!ready ? 'The QR becomes shareable when processing finishes.' : event.publicEnabled ? 'Guests scan this to open the event page and continue to Telegram.' : 'Turn on public access before sharing this QR.'}</p><div className="qr-actions"><button onClick={copyLink} className="button button-quiet" disabled={!ready || !event.publicEnabled}>{copied ? <Check size={15} /> : <Copy size={15} />}{copied ? 'Copied' : 'Copy link'}</button><button onClick={downloadQr} className="button button-dark" disabled={!ready || !event.publicEnabled}><Download size={15} />Download</button></div>{ready && event.publicEnabled && <a className="public-preview-link" href={publicUrl} target="_blank" rel="noreferrer">Preview guest page <ExternalLink size={14} /></a>}</aside>
+      <div className="ed-grid">
+        <section className="ed-library">
+          <div className="block-head"><h2>All photos</h2><span className="muted">{(photosQuery.data?.length ?? 0).toLocaleString()} files</span></div>
+          {photosQuery.isLoading ? (
+            <PageLoader label="Loading photos" />
+          ) : photosQuery.data?.length ? (
+            <div className="photo-grid">
+              {photosQuery.data.map((photo, index) => photo.secureUrl ? (
+                <button className="photo-tile" key={photo.id} onClick={() => setViewingPhoto(photo)} aria-label={`Open photo ${index + 1}`}>
+                  <img src={photo.secureUrl} alt={`Event photo ${index + 1}`} loading="lazy" />
+                  <span className={`photo-state photo-${photo.status.toLowerCase()}`}>{photo.status.replace('_', ' ').toLowerCase()}</span>
+                  <span className="photo-open"><Maximize2 size={14} /></span>
+                </button>
+              ) : (
+                <div className="photo-tile photo-missing" key={photo.id}><ImageOff size={19} /><span>{photo.status.replace('_', ' ').toLowerCase()}</span></div>
+              ))}
+            </div>
+          ) : (
+            <div className="photo-empty"><ImageOff size={22} /><p>Photos you upload will appear here.</p></div>
+          )}
+        </section>
+
+        <aside className="ed-share">
+          <div className="block-head"><h2>Guest QR code</h2><span className={`access-dot${event.publicEnabled ? ' is-on' : ''}`}>{event.publicEnabled ? 'Live' : 'Off'}</span></div>
+          <div className={`qr-card${!ready || !event.publicEnabled ? ' is-disabled' : ''}`} ref={qrRef}>
+            <QRCodeSVG value={publicUrl} size={180} level="H" marginSize={2} bgColor="#ffffff" fgColor="#2B0E18" />
+            <span className="qr-brand">Scan to find your photos</span>
+          </div>
+          <p className="muted">{!ready ? 'The QR code is ready to share once processing finishes.' : event.publicEnabled ? 'Guests scan this, open Telegram, and send one selfie.' : 'Turn guest search on before sharing this QR code.'}</p>
+          <div className="qr-actions">
+            <button onClick={copyLink} className="btn btn-ghost" disabled={!ready || !event.publicEnabled}>{copied ? <Check size={16} /> : <Copy size={16} />}{copied ? 'Copied' : 'Copy link'}</button>
+            <button onClick={downloadQr} className="btn btn-primary" disabled={!ready || !event.publicEnabled}><Download size={16} />Download QR</button>
+          </div>
+          {ready && event.publicEnabled && <a className="link-arrow" href={publicUrl} target="_blank" rel="noreferrer">Preview guest page <ExternalLink size={14} /></a>}
+        </aside>
       </div>
 
-      {confirmDelete && <div className="modal-backdrop"><div className="confirm-modal"><span className="danger-icon"><Trash2 size={20} /></span><p className="section-kicker">Permanent action</p><h2>Delete {event.name}?</h2><p>This removes the event, Cloudinary photographs, guest sessions, and Qdrant embeddings. It cannot be undone.</p>{deleteMutation.error && <p className="form-error">{deleteMutation.error.message}</p>}<div><button className="button button-quiet" onClick={() => setConfirmDelete(false)}>Keep event</button><button className="button button-danger" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>{deleteMutation.isPending ? <LoaderCircle className="spin" size={16} /> : <Trash2 size={15} />}Delete event</button></div></div></div>}
-      {viewingPhoto?.secureUrl && <div className="lightbox organizer-lightbox" role="dialog" aria-modal="true" aria-label="Event photograph viewer"><button className="lightbox-close" onClick={() => setViewingPhoto(null)} aria-label="Close photograph"><X size={20} /></button><img src={viewingPhoto.secureUrl} alt="Selected event photograph" /><div className="organizer-lightbox-actions"><span>{viewingPhoto.status.replace('_', ' ')}</span><button className="button button-danger" onClick={() => setConfirmPhotoDelete(viewingPhoto)}><Trash2 size={16} />Delete photo</button><a className="button button-light" href={viewingPhoto.secureUrl} target="_blank" rel="noreferrer"><Download size={16} />Open original</a></div></div>}
-      {confirmPhotoDelete && <div className="modal-backdrop photo-delete-modal"><div className="confirm-modal"><span className="danger-icon"><Trash2 size={20} /></span><p className="section-kicker">Permanent action</p><h2>Delete this photograph?</h2><p>This removes the image from the event, Cloudinary, guest matches, and face-search index.</p>{deletePhotoMutation.error && <p className="form-error">{deletePhotoMutation.error.message}</p>}<div><button className="button button-quiet" onClick={() => setConfirmPhotoDelete(null)} disabled={deletePhotoMutation.isPending}>Keep photo</button><button className="button button-danger" onClick={() => deletePhotoMutation.mutate(confirmPhotoDelete.id)} disabled={deletePhotoMutation.isPending}>{deletePhotoMutation.isPending ? <LoaderCircle className="spin" size={16} /> : <Trash2 size={15} />}Delete photo</button></div></div></div>}
+      {confirmDelete && (
+        <div className="modal-backdrop">
+          <div className="modal" role="alertdialog" aria-modal="true">
+            <span className="modal-icon"><Trash2 size={20} /></span>
+            <h2>Delete {event.name}?</h2>
+            <p>This permanently removes the event, its photos, guest sessions and face data. It cannot be undone.</p>
+            {deleteMutation.error && <p className="form-error">{deleteMutation.error.message}</p>}
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={() => setConfirmDelete(false)}>Keep event</button>
+              <button className="btn btn-danger" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>{deleteMutation.isPending ? <LoaderCircle className="spin" size={16} /> : <Trash2 size={15} />}Delete event</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {viewingPhoto?.secureUrl && (
+        <div className="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+          <button className="lightbox-close" onClick={() => setViewingPhoto(null)} aria-label="Close photo"><X size={20} /></button>
+          <img src={viewingPhoto.secureUrl} alt="Selected event photo" />
+          <div className="lightbox-actions">
+            <span>{viewingPhoto.status.replace('_', ' ').toLowerCase()}</span>
+            <button className="btn btn-danger" onClick={() => setConfirmPhotoDelete(viewingPhoto)}><Trash2 size={16} />Delete photo</button>
+            <a className="btn btn-light" href={viewingPhoto.secureUrl} target="_blank" rel="noreferrer"><Download size={16} />Open original</a>
+          </div>
+        </div>
+      )}
+      {confirmPhotoDelete && (
+        <div className="modal-backdrop modal-top">
+          <div className="modal" role="alertdialog" aria-modal="true">
+            <span className="modal-icon"><Trash2 size={20} /></span>
+            <h2>Delete this photo?</h2>
+            <p>This removes it from the event, from guest matches and from the face-search index.</p>
+            {deletePhotoMutation.error && <p className="form-error">{deletePhotoMutation.error.message}</p>}
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={() => setConfirmPhotoDelete(null)} disabled={deletePhotoMutation.isPending}>Keep photo</button>
+              <button className="btn btn-danger" onClick={() => deletePhotoMutation.mutate(confirmPhotoDelete.id)} disabled={deletePhotoMutation.isPending}>{deletePhotoMutation.isPending ? <LoaderCircle className="spin" size={16} /> : <Trash2 size={15} />}Delete photo</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
