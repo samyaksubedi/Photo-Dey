@@ -157,20 +157,76 @@ export function GalleryPage() {
     }
   };
 
+  const count = query.data?.length ?? 0;
+
   return (
-    <main className="gallery-shell">
-      <nav className="gallery-nav"><Brand /><span>Your private event gallery</span></nav>
-      {query.isLoading ? <div className="gallery-state"><LoaderCircle className="spin" size={24} /><h1>Preparing your gallery.</h1><p>We’re collecting your matching moments.</p></div> : query.error ? <div className="gallery-state"><Images size={26} /><h1>This gallery isn’t available.</h1><p>{query.error.message}</p><Link to="/" className="button button-dark">Visit PhotoDey</Link></div> : !query.data?.length ? <div className="gallery-state"><Images size={26} /><h1>No matching moments yet.</h1><p>Try another clear, front-facing selfie through the event’s Telegram link.</p></div> : <>
-        <header className="gallery-head"><div><p className="section-kicker">Your moments</p><h1>We found <em>{query.data.length}</em><br />photograph{query.data.length === 1 ? '' : 's'} of you.</h1></div><div className="gallery-head-actions"><p>{selectionMode ? 'Choose the moments you want to keep.' : 'Open a photograph, or choose several to save together.'}</p><button className="gallery-select-toggle" onClick={toggleSelectionMode}>{selectionMode ? <X size={16} /> : <CheckSquare2 size={16} />}{selectionMode ? 'Done' : 'Select'}</button></div></header>
-        {selectionMode && <div className="selection-toolbar"><button className="selection-all" onClick={toggleAll}>{selectedIds.size === downloadablePhotos.length ? <CheckSquare2 size={17} /> : <Square size={17} />}{selectedIds.size === downloadablePhotos.length ? 'Clear all' : 'Select all'}</button><span>{preparedFiles ? 'Ready on your device' : `${selectedIds.size} selected`}</span><button className="selection-primary" onClick={preparedFiles ? sharePrepared : prepareSelected} disabled={!selectedIds.size || downloading}>{downloading ? <LoaderCircle className="spin" size={15} /> : preparedFiles ? <Share2 size={15} /> : <Download size={15} />}{downloading ? (downloadProgress ? `Packing ${downloadProgress}%` : 'Preparing…') : preparedFiles ? 'Share or save' : `Save ${selectedIds.size || ''}`}</button></div>}
-        {downloadError && <p className="gallery-download-error">{downloadError}</p>}
-        <section className={`masonry-gallery${selectionMode ? ' is-selecting' : ''}`}>{downloadablePhotos.map((match, index) => {
-          const isSelected = selectedIds.has(match.photo.id);
-          return <button key={match.photo.id} onClick={() => selectionMode ? togglePhoto(match.photo.id) : setLightboxPhoto(match)} className={`gallery-item gallery-item-${(index % 5) + 1}${isSelected ? ' is-selected' : ''}`} aria-label={selectionMode ? `${isSelected ? 'Deselect' : 'Select'} photograph ${index + 1}` : `Open photograph ${index + 1}`} aria-pressed={selectionMode ? isSelected : undefined}><img src={match.photo.secureUrl ?? ''} alt={`Matched event photograph ${index + 1}`} loading="lazy" />{selectionMode ? <span className="gallery-select-indicator">{isSelected ? <Check size={16} /> : null}</span> : null}</button>;
-        })}</section>
-      </>}
-      <footer className="gallery-footer"><Brand /><p>Your moments, our focus.</p></footer>
-      {lightboxPhoto?.photo.secureUrl && <div className="lightbox" role="dialog" aria-modal="true" aria-label="Photograph viewer"><button className="lightbox-close" onClick={() => setLightboxPhoto(null)} aria-label="Close photo"><X size={20} /></button><img src={lightboxPhoto.photo.secureUrl} alt="Selected matched event photograph" /><a className="button button-light" href={lightboxPhoto.photo.secureUrl} download target="_blank" rel="noreferrer"><Download size={16} />Open original</a></div>}
+    <main className="gal">
+      <header className="gal-top">
+        <Brand />
+        {count > 0 && (
+          <button className="btn btn-ghost btn-sm" onClick={toggleSelectionMode}>
+            {selectionMode ? <X size={16} /> : <CheckSquare2 size={16} />}
+            {selectionMode ? 'Done' : 'Select photos'}
+          </button>
+        )}
+      </header>
+
+      {query.isLoading ? (
+        <div className="gal-state"><LoaderCircle className="spin" size={26} /><h1>Finding your photos.</h1><p>This usually takes a few seconds.</p></div>
+      ) : query.error ? (
+        <div className="gal-state"><Images size={28} /><h1>This gallery isn’t available.</h1><p>{query.error.message}</p><Link to="/" className="btn btn-primary">Visit PhotoDey</Link></div>
+      ) : !count ? (
+        <div className="gal-state"><Images size={28} /><h1>No matching photos yet.</h1><p>Send another clear, front-facing selfie through the event’s Telegram link.</p></div>
+      ) : (
+        <>
+          <section className="gal-intro">
+            <h1>We found {count} photo{count === 1 ? '' : 's'} of you.</h1>
+            <p>{selectionMode ? 'Tap photos to choose the ones you want to keep.' : 'Tap a photo to view it full size, or choose several to save together.'}</p>
+          </section>
+          {downloadError && <p className="gal-error">{downloadError}</p>}
+          <section className={`gal-grid${selectionMode ? ' is-selecting' : ''}`}>
+            {downloadablePhotos.map((match, index) => {
+              const isSelected = selectedIds.has(match.photo.id);
+              return (
+                <button
+                  key={match.photo.id}
+                  onClick={() => (selectionMode ? togglePhoto(match.photo.id) : setLightboxPhoto(match))}
+                  className={`gal-item${isSelected ? ' is-selected' : ''}`}
+                  aria-label={selectionMode ? `${isSelected ? 'Deselect' : 'Select'} photograph ${index + 1}` : `Open photograph ${index + 1}`}
+                  aria-pressed={selectionMode ? isSelected : undefined}
+                >
+                  <img src={match.photo.secureUrl ?? ''} alt={`Matched event photograph ${index + 1}`} loading="lazy" />
+                  {selectionMode && <span className="gal-check">{isSelected ? <Check size={16} /> : null}</span>}
+                </button>
+              );
+            })}
+          </section>
+        </>
+      )}
+
+      {selectionMode && count > 0 && (
+        <div className="gal-dock" role="toolbar" aria-label="Selection actions">
+          <button className="gal-dock-all" onClick={toggleAll}>
+            {selectedIds.size === downloadablePhotos.length ? <CheckSquare2 size={18} /> : <Square size={18} />}
+            {selectedIds.size === downloadablePhotos.length ? 'Clear all' : 'Select all'}
+          </button>
+          <span>{preparedFiles ? 'Ready on your device' : `${selectedIds.size} selected`}</span>
+          <button className="btn btn-gold btn-sm" onClick={preparedFiles ? sharePrepared : prepareSelected} disabled={!selectedIds.size || downloading}>
+            {downloading ? <LoaderCircle className="spin" size={15} /> : preparedFiles ? <Share2 size={15} /> : <Download size={15} />}
+            {downloading ? (downloadProgress ? `Packing ${downloadProgress}%` : 'Preparing') : preparedFiles ? 'Share or save' : `Save ${selectedIds.size || ''}`}
+          </button>
+        </div>
+      )}
+
+      <footer className="gal-foot"><span>Photos matched by</span><Brand /></footer>
+
+      {lightboxPhoto?.photo.secureUrl && (
+        <div className="lightbox" role="dialog" aria-modal="true" aria-label="Photograph viewer">
+          <button className="lightbox-close" onClick={() => setLightboxPhoto(null)} aria-label="Close photo"><X size={20} /></button>
+          <img src={lightboxPhoto.photo.secureUrl} alt="Selected matched event photograph" />
+          <a className="btn btn-light" href={lightboxPhoto.photo.secureUrl} download target="_blank" rel="noreferrer"><Download size={16} />Open original</a>
+        </div>
+      )}
     </main>
   );
 }

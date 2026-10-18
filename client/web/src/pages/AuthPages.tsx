@@ -2,21 +2,28 @@ import { ArrowLeft, ArrowRight, CheckCircle2, LoaderCircle, Mail, Send } from 'l
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Brand } from '../components/Brand';
+import { Scene } from '../components/Scene';
 import { useAuth } from '../context/AuthContext';
 import { ApiClientError, apiRequest } from '../lib/api';
 
 function AuthShell({ children, asideTitle, asideCopy }: { children: ReactNode; asideTitle: string; asideCopy: string }) {
   return (
-    <main className="auth-shell">
-      <section className="auth-panel">
-        <Brand />
-        {children}
-        <Link className="back-home" to="/"><ArrowLeft size={15} /> Back to PhotoDey</Link>
+    <main className="auth">
+      <section className="auth-main">
+        <div className="auth-top">
+          <Brand />
+          <Link className="auth-back" to="/"><ArrowLeft size={15} />Back to site</Link>
+        </div>
+        <div className="auth-card">{children}</div>
+        <p className="auth-foot">Photo discovery for weddings, ceremonies and college fests.</p>
       </section>
       <aside className="auth-aside">
-        <div className="auth-aside-photo" />
-        <div className="auth-quote">
-          <span>For moments worth finding</span>
+        <div className="auth-collage" aria-hidden="true">
+          <div className="auth-tile auth-tile-a"><Scene kind="wedding" matches={[{ x: 138, y: 112, w: 64, h: 76, label: 'You · 98%', hot: true }]} /></div>
+          <div className="auth-tile auth-tile-b"><Scene kind="family" crop={[40, 50, 260, 195]} /></div>
+          <div className="auth-tile auth-tile-c"><Scene kind="college" crop={[40, 40, 260, 195]} /></div>
+        </div>
+        <div className="auth-aside-copy">
           <h2>{asideTitle}</h2>
           <p>{asideCopy}</p>
         </div>
@@ -59,7 +66,7 @@ export function SignInPage() {
           <label>Email address<input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></label>
           <label>Password<input required minLength={6} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" /></label>
           {error && <p className="form-error">{error}</p>}
-          <button className="button button-dark button-wide" disabled={submitting}>
+          <button className="btn btn-primary btn-block" disabled={submitting}>
             {submitting ? <LoaderCircle className="spin" size={17} /> : <>Sign in <ArrowRight size={17} /></>}
           </button>
         </form>
@@ -97,7 +104,7 @@ export function SignUpPage() {
     <AuthShell asideTitle="A beautiful handoff after a beautiful event." asideCopy="PhotoDey turns one event link into a personal delivery experience for every guest.">
       <div className="auth-form-wrap">
         {complete ? (
-          <div className="auth-success"><span><Mail size={24} /></span><p className="section-kicker">One final step</p><h1>Check your inbox.</h1><p>We sent a verification link to <strong>{email}</strong>. Verify your email, then return to sign in.</p><div className="auth-success-actions"><Link className="button button-dark" to="/sign-in">Go to sign in <ArrowRight size={16} /></Link><Link className="button button-quiet" to={`/resend-verification?email=${encodeURIComponent(email)}`}>Resend email</Link></div></div>
+          <div className="auth-success"><span><Mail size={24} /></span><p className="section-kicker">One final step</p><h1>Check your inbox.</h1><p>We sent a verification link to <strong>{email}</strong>. Verify your email, then return to sign in.</p><div className="auth-success-actions"><Link className="btn btn-primary" to="/sign-in">Go to sign in <ArrowRight size={16} /></Link><Link className="btn btn-ghost" to={`/resend-verification?email=${encodeURIComponent(email)}`}>Resend email</Link></div></div>
         ) : (
           <>
             <p className="section-kicker">Create your workspace</p>
@@ -108,7 +115,7 @@ export function SignUpPage() {
               <label>Email address<input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></label>
               <label>Password<input required minLength={6} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" /></label>
               {error && <p className="form-error">{error}</p>}
-              <button className="button button-dark button-wide" disabled={submitting}>{submitting ? <LoaderCircle className="spin" size={17} /> : <>Create account <ArrowRight size={17} /></>}</button>
+              <button className="btn btn-primary btn-block" disabled={submitting}>{submitting ? <LoaderCircle className="spin" size={17} /> : <>Create account <ArrowRight size={17} /></>}</button>
             </form>
             <p className="auth-switch">Already have an account? <Link to="/sign-in">Sign in</Link></p>
           </>
@@ -145,7 +152,7 @@ export function ResendVerificationPage() {
     <AuthShell asideTitle="A fresh invitation to your workspace." asideCopy="Verification links are intentionally short-lived. Request another without creating a second account.">
       <div className="auth-form-wrap">
         {state === 'success' ? (
-          <div className="auth-success"><span><Send size={24} /></span><p className="section-kicker">Email sent</p><h1>Check your inbox.</h1><p>{message}</p><Link className="button button-dark" to="/sign-in">Return to sign in <ArrowRight size={16} /></Link></div>
+          <div className="auth-success"><span><Send size={24} /></span><p className="section-kicker">Email sent</p><h1>Check your inbox.</h1><p>{message}</p><Link className="btn btn-primary" to="/sign-in">Return to sign in <ArrowRight size={16} /></Link></div>
         ) : (
           <>
             <p className="section-kicker">Email verification</p>
@@ -154,7 +161,7 @@ export function ResendVerificationPage() {
             <form className="form-stack" onSubmit={submit}>
               <label>Email address<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></label>
               {message && <p className="form-error">{message}</p>}
-              <button className="button button-dark button-wide" disabled={state === 'loading'}>{state === 'loading' ? <LoaderCircle className="spin" size={17} /> : <>Send verification email <ArrowRight size={17} /></>}</button>
+              <button className="btn btn-primary btn-block" disabled={state === 'loading'}>{state === 'loading' ? <LoaderCircle className="spin" size={17} /> : <>Send verification email <ArrowRight size={17} /></>}</button>
             </form>
             <p className="auth-switch">Already verified? <Link to="/sign-in">Sign in</Link></p>
           </>
@@ -190,7 +197,7 @@ export function VerifyEmailPage() {
         <p className="section-kicker">Email verification</p>
         <h1>{state === 'success' ? 'You’re verified.' : 'Confirm your account.'}</h1>
         <p>{message || 'Verify your email to unlock your organizer workspace.'}</p>
-        {state === 'success' ? <Link className="button button-dark" to="/sign-in">Continue to sign in</Link> : <button className="button button-accent" onClick={verify} disabled={state === 'loading'}>{state === 'loading' ? <LoaderCircle className="spin" size={17} /> : 'Verify email'}</button>}
+        {state === 'success' ? <Link className="btn btn-primary" to="/sign-in">Continue to sign in</Link> : <button className="btn btn-primary" onClick={verify} disabled={state === 'loading'}>{state === 'loading' ? <LoaderCircle className="spin" size={17} /> : 'Verify email'}</button>}
       </div>
     </main>
   );

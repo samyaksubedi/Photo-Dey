@@ -1,160 +1,191 @@
 import {
   ArrowRight,
   ArrowUpRight,
-  Camera,
-  Check,
-  Images,
-  LockKeyhole,
+  Eye,
+  Lock,
+  Power,
   QrCode,
   ScanFace,
-  Sparkles,
+  UploadCloud,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Brand } from '../components/Brand';
+import { ChatPhone, DashMock, TableCard } from '../components/Mockups';
+import { Scene, type Match, type SceneKind } from '../components/Scene';
 import { useAuth } from '../context/AuthContext';
+
+const heroMatches: Match[] = [
+  { x: 138, y: 112, w: 64, h: 76, label: 'You · 98%', hot: true },
+  { x: 206, y: 108, w: 64, h: 80 },
+  { x: 84, y: 130, w: 42, h: 56 },
+  { x: 275, y: 126, w: 42, h: 60 },
+];
+
+const occasions: Array<{ kind: SceneKind; title: string; note: string; crop: [number, number, number, number] }> = [
+  { kind: 'wedding', title: 'Weddings and receptions', note: 'Hundreds of guests, thousands of photos.', crop: [40, 30, 260, 195] },
+  { kind: 'family', title: 'Bratabandha, Pasni and pujas', note: 'Every relative finds their own pictures.', crop: [40, 60, 260, 195] },
+  { kind: 'party', title: 'Sangeet, birthdays and parties', note: 'No more group chats full of files.', crop: [60, 40, 260, 195] },
+  { kind: 'college', title: 'College fests and reunions', note: 'Everyone in the batch gets their own gallery.', crop: [40, 40, 260, 195] },
+  { kind: 'concert', title: 'Concerts and live shows', note: 'Find yourself in a crowd of thousands.', crop: [50, 50, 260, 195] },
+];
 
 export function LandingPage() {
   const { user, loading } = useAuth();
   const workspacePath = user || loading ? '/dashboard' : '/sign-up';
-  const workspaceLabel = loading ? 'Open PhotoDey' : user ? 'Open dashboard' : 'Create your event';
+  const primaryLabel = loading ? 'Open PhotoDey' : user ? 'Open dashboard' : 'Create your event';
 
   return (
-    <main className="landing-shell">
-      <nav className="nav container" aria-label="Main navigation">
-        <Brand />
-        <div className="nav-links">
-          <a href="#how-it-works">How it works</a>
-          <a href="#for-organizers">For organizers</a>
-          <a href="#privacy">Privacy</a>
-          <a href="#faq">FAQ</a>
-        </div>
-        <div className="nav-actions">
-          {!loading && user ? <Link className="text-link" to="/dashboard/account">Account</Link> : !loading ? <Link className="text-link" to="/sign-in">Sign in</Link> : null}
-          <Link className="button button-dark button-small" to={workspacePath}>{loading ? 'Open PhotoDey' : user ? 'Dashboard' : 'Create an event'} <ArrowUpRight size={15} /></Link>
-        </div>
-      </nav>
-
-      <section className="hero container">
-        <div className="hero-copy">
-          <p className="eyebrow"><span /> Private photo discovery for every event</p>
-          <h1>Every moment<br />you were <em>in.</em></h1>
-          <p className="hero-lede">
-            Every guest gets the photographs they appear in, from weddings
-            and family ceremonies to concerts and college fests, without
-            scrolling through hundreds that aren’t theirs.
-          </p>
-          <div className="hero-actions">
-            <Link className="button button-accent" to={workspacePath}>
-              {workspaceLabel} <ArrowUpRight size={17} />
+    <main className="lp">
+      <header className="lp-nav-wrap">
+        <nav className="lp-nav lp-container" aria-label="Main navigation">
+          <Brand />
+          <div className="lp-nav-links">
+            <a href="#occasions">Events</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="#organizers">For organizers</a>
+            <a href="#privacy">Privacy</a>
+            <a href="#faq">FAQ</a>
+          </div>
+          <div className="lp-nav-actions">
+            {!loading && !user && <Link className="lp-nav-signin" to="/sign-in">Sign in</Link>}
+            <Link className="btn btn-primary btn-sm" to={workspacePath}>
+              {loading ? 'Open PhotoDey' : user ? 'Dashboard' : 'Get started'}
             </Link>
-            <a className="button button-quiet" href="#how-it-works">See how it works</a>
           </div>
-          <div className="hero-notes" aria-label="Product highlights">
-            <span>Guests use Telegram</span>
-            <span>One selfie</span>
-            <span>Private by event</span>
-          </div>
-        </div>
+        </nav>
+      </header>
 
-        <div className="hero-visual" aria-label="A joyful event captured in photographs">
-          <div className="hero-photo" />
-          <div className="match-card">
-            <div className="match-avatar" />
-            <div>
-              <strong>18 moments found</strong>
-              <span>Your private event gallery</span>
-            </div>
-            <span className="match-check">✓</span>
-          </div>
-          <p className="photo-caption">A thousand photographs.<br />The right ones, instantly.</p>
-        </div>
-      </section>
-
-      <section className="signal-bar" aria-label="PhotoDey process summary">
-        <div className="container signal-inner">
-          <span>Upload the event</span><i />
-          <span>Share one QR</span><i />
-          <span>Guests find themselves</span>
-        </div>
-      </section>
-
-      <section className="section process-section container" id="how-it-works">
-        <div className="section-heading">
-          <div>
-            <p className="section-kicker">A simpler way to share</p>
-            <h2>From camera roll to<br /><em>their</em> camera roll.</h2>
-          </div>
-          <p>
-            One thoughtful workflow for organizers, photographers, and every
-            guest who wants the moments they were part of.
+      <section className="lp-hero lp-container">
+        <div className="lp-hero-copy">
+          <h1>Find yourself in every event photo.</h1>
+          <p className="lp-lede">
+            Upload your event once. Guests scan a QR code, send one selfie on Telegram,
+            and get only the photos they are in.
           </p>
+          <div className="lp-hero-actions">
+            <Link className="btn btn-primary btn-lg" to={workspacePath}>
+              {primaryLabel} <ArrowUpRight size={18} />
+            </Link>
+            <a className="btn btn-ghost btn-lg" href="#how-it-works">See how it works</a>
+          </div>
+          <ul className="lp-hero-facts">
+            <li>Up to 5,000 photos per event</li>
+            <li>Guests need only Telegram</li>
+            <li>You control who can search</li>
+          </ul>
         </div>
-        <div className="process-grid">
-          <article className="process-card">
-            <span className="process-number">01</span>
-            <div className="process-icon"><Images size={22} /></div>
+
+        <div className="lp-hero-stage" aria-label="A wedding photo with faces matched to a guest">
+          <div className="lp-hero-frame">
+            <Scene kind="wedding" matches={heroMatches} />
+          </div>
+          <div className="lp-hero-phone">
+            <ChatPhone />
+          </div>
+          <div className="lp-hero-chip">
+            <span className="lp-chip-dot" />
+            <div>
+              <strong>24 photos found</strong>
+              <small>from 1,240 in 3 seconds</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="lp-section lp-container" id="occasions">
+        <div className="lp-head">
+          <h2>Made for the way we celebrate.</h2>
+          <p>From a Kathmandu wedding to a Delhi college fest, the guest list is big and the camera roll is bigger.</p>
+        </div>
+        <div className="lp-occasions">
+          {occasions.map((item) => (
+            <article className="lp-occasion" key={item.title}>
+              <div className="lp-occasion-art"><Scene kind={item.kind} crop={item.crop} /></div>
+              <h3>{item.title}</h3>
+              <p>{item.note}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="lp-section lp-container" id="how-it-works">
+        <div className="lp-head">
+          <h2>Three steps. No sorting, no sending.</h2>
+          <p>You do the first two. Your guests do the third, on their own phones.</p>
+        </div>
+        <ol className="lp-steps">
+          <li className="lp-step">
+            <div className="lp-stage lp-stage-upload" aria-hidden="true">
+              <div className="mini-upload">
+                <div className="mini-upload-icon"><UploadCloud size={22} /></div>
+                <b>Priya &amp; Arjun Wedding</b>
+                <span>1,240 photos added</span>
+                <i><u /></i>
+                <small>Matching faces, 100% done</small>
+              </div>
+            </div>
+            <span className="lp-step-no">1</span>
             <h3>Upload the event</h3>
-            <p>Add the photographs once. PhotoDey quietly prepares each face for private discovery.</p>
-          </article>
-          <article className="process-card process-card-featured">
-            <span className="process-number">02</span>
-            <div className="process-icon"><QrCode size={22} /></div>
-            <h3>Place one QR</h3>
-            <p>Guests scan a beautiful event link and continue through the PhotoDey Telegram bot.</p>
-          </article>
-          <article className="process-card">
-            <span className="process-number">03</span>
-            <div className="process-icon"><ScanFace size={22} /></div>
-            <h3>Send one selfie</h3>
-            <p>A clear selfie becomes a private key to their matching photographs—not anyone else’s.</p>
-          </article>
-        </div>
+            <p>Add every photo in batches. PhotoDey finds the faces in the background and shows live progress.</p>
+          </li>
+          <li className="lp-step">
+            <div className="lp-stage lp-stage-card"><TableCard /></div>
+            <span className="lp-step-no">2</span>
+            <h3>Share one QR code</h3>
+            <p>Download it, print it for the tables, or post the link in your family group.</p>
+          </li>
+          <li className="lp-step">
+            <div className="lp-stage lp-stage-phone"><ChatPhone /></div>
+            <span className="lp-step-no">3</span>
+            <h3>Guests send a selfie</h3>
+            <p>The Telegram bot matches the selfie to the event and replies with a personal gallery link.</p>
+          </li>
+        </ol>
       </section>
 
-      <section className="editorial-section" id="for-organizers">
-        <div className="container editorial-grid">
-          <div className="editorial-photo editorial-photo-main">
-            <div className="floating-label"><Camera size={14} /> Built for real events</div>
-          </div>
-          <div className="editorial-copy">
-            <p className="section-kicker">For organizers</p>
-            <h2>More time in the moment.<br />Less time sending files.</h2>
-            <p>
-              Give every guest a personal gallery without sorting folders,
-              answering messages, or publishing the entire event publicly.
-            </p>
-            <ul className="check-list">
-              <li><Check size={15} /> Live processing progress</li>
-              <li><Check size={15} /> Public access you control</li>
-              <li><Check size={15} /> One link for the whole event</li>
+      <section className="lp-organizers" id="organizers">
+        <div className="lp-container lp-organizers-grid">
+          <div className="lp-organizers-copy">
+            <h2>Your whole event, in one place.</h2>
+            <p>See upload and matching progress as it happens, and share only when you are ready.</p>
+            <ul>
+              <li><span><UploadCloud size={18} /></span><div><b>Resume-safe uploads</b><small>A dropped connection never duplicates photos. Retry and carry on.</small></div></li>
+              <li><span><Power size={18} /></span><div><b>One switch for guest access</b><small>Turn searching off at any time, even after the QR is printed.</small></div></li>
+              <li><span><QrCode size={18} /></span><div><b>QR and link, ready to use</b><small>Download the QR or copy the event link as soon as processing finishes.</small></div></li>
             </ul>
-            <Link className="inline-action" to={workspacePath}>{loading ? 'Open PhotoDey' : user ? 'Return to your events' : 'Start with your first event'} <ArrowRight size={17} /></Link>
+            <Link className="btn btn-gold btn-lg" to={workspacePath}>{primaryLabel} <ArrowRight size={18} /></Link>
           </div>
-          <div className="editorial-photo editorial-photo-side" />
+          <div className="lp-organizers-visual"><DashMock /></div>
         </div>
       </section>
 
-      <section className="section privacy-section container" id="privacy">
-        <div className="privacy-card">
-          <div className="privacy-copy">
-            <p className="section-kicker section-kicker-light">Privacy is product design</p>
-            <h2>Personal discovery.<br />Not public exposure.</h2>
-            <p>
-              Searches stay scoped to one event. Organizers control whether an
-              event can be discovered, and guests receive only their matched moments.
-            </p>
-          </div>
-          <div className="privacy-points">
-            <div><LockKeyhole size={20} /><span><strong>Event-scoped</strong>Face matching never crosses event boundaries.</span></div>
-            <div><Sparkles size={20} /><span><strong>Purposeful</strong>Selfies are used to find photographs, not to build a public profile.</span></div>
-            <div><ScanFace size={20} /><span><strong>Controlled</strong>Public access can be disabled by the organizer at any time.</span></div>
-          </div>
+      <section className="lp-section lp-container" id="privacy">
+        <div className="lp-head">
+          <h2>Private by design.</h2>
+          <p>Guests find their own photos. They never get a browsable album of everyone else.</p>
+        </div>
+        <div className="lp-privacy">
+          <article>
+            <span><Lock size={20} /></span>
+            <h3>Limited to one event</h3>
+            <p>A selfie is only compared with photos from the event the guest scanned. Nothing crosses between events.</p>
+          </article>
+          <article>
+            <span><ScanFace size={20} /></span>
+            <h3>Used to find photos, nothing else</h3>
+            <p>The selfie is used to search that event, not to build a public profile of the guest.</p>
+          </article>
+          <article>
+            <span><Eye size={20} /></span>
+            <h3>You decide who can search</h3>
+            <p>Switch off public access on any event and new searches stop immediately.</p>
+          </article>
         </div>
       </section>
 
-      <section className="section faq-section container" id="faq">
-        <h2>Questions organizers ask first</h2>
-        <div className="faq-list">
+      <section className="lp-section lp-container lp-faq" id="faq">
+        <div className="lp-head lp-head-narrow"><h2>Questions organizers ask first</h2></div>
+        <div className="lp-faq-list">
           <details>
             <summary>Do guests need an account?</summary>
             <p>No. Guests scan the QR code, open the PhotoDey bot in Telegram, and send one selfie. They need Telegram on their phone, nothing else.</p>
@@ -178,19 +209,36 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="final-cta container">
-        <p className="section-kicker">Start with one event</p>
-        <h2>Make every guest part<br />of the gallery.</h2>
-        <Link className="button button-accent" to={workspacePath}>{workspaceLabel} <ArrowUpRight size={17} /></Link>
+      <section className="lp-container lp-final">
+        <div className="lp-final-card">
+          <div>
+            <h2>Give every guest their own gallery.</h2>
+            <p>Create your first event in a few minutes.</p>
+            <Link className="btn btn-gold btn-lg" to={workspacePath}>{primaryLabel} <ArrowUpRight size={18} /></Link>
+          </div>
+          <div className="lp-final-art"><TableCard event="Your event" url="https://photodey.com" /></div>
+        </div>
       </section>
 
-      <footer className="site-footer">
-        <div className="container footer-grid">
-          <div><Brand light /><p>Private photo discovery for memorable events.</p></div>
-          <div><span>Product</span><a href="#how-it-works">How it works</a><Link to={user || loading ? '/dashboard' : '/sign-in'}>{loading ? 'Open PhotoDey' : user ? 'Organizer dashboard' : 'Organizer sign in'}</Link></div>
-          <div><span>Guests</span><a href="#privacy">Privacy</a><a href="mailto:hello@photodey.com">Support</a></div>
-          <p className="footer-note">© {new Date().getFullYear()} PhotoDey</p>
+      <footer className="lp-footer">
+        <div className="lp-container lp-footer-grid">
+          <div>
+            <Brand light />
+            <p>Find yourself in every event photo.</p>
+          </div>
+          <div>
+            <b>Product</b>
+            <a href="#how-it-works">How it works</a>
+            <a href="#privacy">Privacy</a>
+            <Link to={user || loading ? '/dashboard' : '/sign-in'}>{loading ? 'Open PhotoDey' : user ? 'Dashboard' : 'Organizer sign in'}</Link>
+          </div>
+          <div>
+            <b>Help</b>
+            <a href="#faq">FAQ</a>
+            <a href="mailto:hello@photodey.com">hello@photodey.com</a>
+          </div>
         </div>
+        <div className="lp-container lp-footer-base">© {new Date().getFullYear()} PhotoDey</div>
       </footer>
     </main>
   );
